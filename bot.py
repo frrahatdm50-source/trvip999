@@ -13,19 +13,18 @@ import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
 
 # =====================================================================
-# 🛠️ [CUSTOMIZABLE CONFIGURATION - এখানে আপনি যেকোনো সময় লেখা ও লিংক এডিট করতে পারবেন]
+# 🛠️ [CUSTOMIZABLE CONFIGURATION - এখানে লেখা ও লিংক এডিট করতে পারবেন]
 # =====================================================================
 BOT_TOKEN = "8938988396:AAEUvJyoWUuzc8NB9Y2LyNPIrwD-LL6NM00"
-TARGET_CHATS = ["@trvip999", "8699074327"]  # চ্যানেল বা ইউজার আইডি পরিবর্তন করতে পারবেন
-ADMIN_CHAT_ID = "8699074327"              # আপনার এডমিন আইডি
+TARGET_CHATS = ["@trvip999", "8699074327"]
+ADMIN_CHAT_ID = "8699074327"
 
 TIMEZONE = "Asia/Dhaka"  # UTC+6
-VIP_HEADER = "👑 Trader Rahat | TR VIP 999" # ব্র্যান্ডের নাম এখানে পরিবর্তন করতে পারবেন
+VIP_HEADER = "👑 Trader Rahat | TR VIP 999"
 
-CHANNEL_LINK = "https://t.me/traderrahat420"              # অফিশিয়াল চ্যানেলের লিংক
-REGISTER_LINK = "https://broker-qx.pro/sign-up/?lid=2187284" # রেজিস্ট্রেশন বা এফিলিয়েট লিংক
+CHANNEL_LINK = "https://t.me/traderrahat420"
+REGISTER_LINK = "https://broker-qx.pro/sign-up/?lid=2187284"
 
-# ভিআইপি ট্রেডিং নিয়মাবলী (প্রয়োজনে যেকোনো লাইন এখানে পরিবর্তন বা এডিট করতে পারবেন)
 VIP_RULES_TEXT = (
     f"{VIP_HEADER}\n"
     "━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -292,8 +291,11 @@ def run_vip_trading_bot():
     current_session_date = None
     session_signals_sent = {10: 0, 14: 0, 20: 0}
     session_target_limit = {10: 5, 14: 5, 20: 5}
-    session_started = {10: False, 14: False, 20: False}
-    reminder_sent = {10: False, 14: False, 20: False}
+    
+    # ডাবল ট্রিগার রোধ করার জন্য নিখুঁত ফ্ল্যাগ ট্র্যাকিক
+    session_started_flag = {10: False, 14: False, 20: False}
+    reminder_sent_flag = {10: False, 14: False, 20: False}
+    
     active_session_hour = None
     
     while True:
@@ -306,16 +308,17 @@ def run_vip_trading_bot():
         if current_session_date != today_str:
             current_session_date = today_str
             session_signals_sent = {10: 0, 14: 0, 20: 0}
-            session_started = {10: False, 14: False, 20: False}
-            reminder_sent = {10: False, 14: False, 20: False}
+            session_started_flag = {10: False, 14: False, 20: False}
+            reminder_sent_flag = {10: False, 14: False, 20: False}
             active_session_hour = None
             
         active_hours = [10, 14, 20]
         
+        # ১. ৩০ মিনিট আগের রিমাইন্ডার (সঠিক সময়ে মাত্র একবার যাওয়ার জন্য চেক)
         for h in active_hours:
             remind_hour = h - 1
-            if current_hour == remind_hour and 30 <= current_minute <= 32 and not reminder_sent[h]:
-                reminder_sent[h] = True
+            if current_hour == remind_hour and current_minute >= 30 and not reminder_sent_flag[h]:
+                reminder_sent_flag[h] = True
                 broadcast_text(
                     f"{VIP_HEADER}\n"
                     f"━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -325,12 +328,13 @@ def run_vip_trading_bot():
                     with_button=True
                 )
                 
+        # ২. সেশন শুরুর ঠিক ৫ মিনিট আগে বা সেশন আওয়ারে স্টার্ট ব্যানার ও রুলস (মাত্র একবার ট্রিগার হবে)
         for h in active_hours:
             is_pre_session = (current_hour == h - 1 and current_minute >= 55)
             is_in_session = (current_hour == h and session_signals_sent[h] == 0)
             
-            if (is_pre_session or is_in_session) and not session_started[h]:
-                session_started[h] = True
+            if (is_pre_session or is_in_session) and not session_started_flag[h]:
+                session_started_flag[h] = True
                 session_wins = 0
                 session_losses = 0
                 last_was_loss = False
@@ -349,6 +353,7 @@ def run_vip_trading_bot():
         if current_hour in active_hours and session_signals_sent[current_hour] < session_target_limit[current_hour]:
             active_session_hour = current_hour
             
+        # ৩. মূল ট্রেডিং সেশন সিগন্যাল লজিক
         if active_session_hour is not None:
             sent_count = session_signals_sent[active_session_hour]
             target_count = session_target_limit[active_session_hour]
