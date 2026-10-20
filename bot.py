@@ -12,44 +12,41 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
 
-# --- [CONFIGURATION: TRADER RAHAT | TR VIP 999] ---
+# =====================================================================
+# 🛠️ [CUSTOMIZABLE CONFIGURATION - এখানে আপনি যেকোনো সময় লেখা ও লিংক এডিট করতে পারবেন]
+# =====================================================================
 BOT_TOKEN = "8938988396:AAEUvJyoWUuzc8NB9Y2LyNPIrwD-LL6NM00"
-TARGET_CHATS = ["@trvip999", "8699074327"]
-ADMIN_CHAT_ID = "8699074327"
+TARGET_CHATS = ["@trvip999", "8699074327"]  # চ্যানেল বা ইউজার আইডি পরিবর্তন করতে পারবেন
+ADMIN_CHAT_ID = "8699074327"              # আপনার এডমিন আইডি
 
 TIMEZONE = "Asia/Dhaka"  # UTC+6
-VIP_HEADER = "👑 ট্রেডার রাহাত | টি আর ভিআইপি ৯৯৯"
+VIP_HEADER = "👑 Trader Rahat | TR VIP 999" # ব্র্যান্ডের নাম এখানে পরিবর্তন করতে পারবেন
 
-CHANNEL_LINK = "https://t.me/traderrahat420"
-REGISTER_LINK = "https://broker-qx.pro/sign-up/?lid=2187284"
+CHANNEL_LINK = "https://t.me/traderrahat420"              # অফিশিয়াল চ্যানেলের লিংক
+REGISTER_LINK = "https://broker-qx.pro/sign-up/?lid=2187284" # রেজিস্ট্রেশন বা এফিলিয়েট লিংক
 
-# সম্পূর্ণ গোছানো বাংলা হরফে ভিআইপি রুলস
+# ভিআইপি ট্রেডিং নিয়মাবলী (প্রয়োজনে যেকোনো লাইন এখানে পরিবর্তন বা এডিট করতে পারবেন)
 VIP_RULES_TEXT = (
     f"{VIP_HEADER}\n"
     "━━━━━━━━━━━━━━━━━━━━━━\n"
-    "📌 অ্যাকাউন্ট করার নির্দেশিকা:\n"
-    "অবশ্যই আমাদের অফিসিয়াল লিংকের মাধ্যমে নতুন অ্যাকাউন্ট তৈরি করতে হবে।\n"
-    f"🔗 রেজিস্ট্রেশন লিংক: {REGISTER_LINK}\n"
-    "(অ্যাকাউন্ট খোলার পর আপনার ইউআইডি অ্যাডমিনকে দিয়ে ভেরিফাই করে নিন)\n\n"
-    "📌 ট্রেডিং ও মানি ম্যানেজমেন্ট নিয়ম:\n"
-    "• নিজের ডিভাইসে UTC+6 সময় নিখুঁতভাবে মিলিয়ে নেবেন।\n"
-    "• প্রতিটি সিগন্যাল এন্ট্রি সময়ের ঠিক ২ মিনিট (২ ক্যান্ডেল) আগে দেওয়া হবে।\n"
-    "• পেয়ার ও টাইম সেট করে সিগন্যাল টাইমের ১-২ সেকেন্ড আগে এন্ট্রি নেবেন।\n"
+    "📌 VIP Trading & Money Management Rules:\n\n"
+    "• আপনার ডিভাইসে UTC+6 সময় নিখুঁতভাবে মিলিয়ে নেবেন।\n"
+    "• প্রতিটি সিগন্যাল এন্ট্রি সময়ের ঠিক ২ মিনিট আগে দেওয়া হবে।\n"
+    "• মার্কেট পেয়ার ও টাইম সেট করে সিগন্যাল টাইমের ১-২ সেকেন্ড আগেই ট্রেড এন্ট্রি নেবেন।\n"
     "• সবসময় ১-স্টেপ মার্টিনগেল এবং ১-২-৪ মানি ম্যানেজমেন্ট রুল ফলো করবেন।\n"
-    "• প্রতিদিনের ৫% প্রফিট টার্গেট পূরণ হলে ট্রেড বন্ধ রাখবেন।"
+    "• প্রতিদিনের ৫% প্রফিট টার্গেট পূরণ হলে সাথে সাথে ট্রেড বন্ধ রাখবেন।"
 )
 
 HIGH_PAYOUT_PAIRS = [
     "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "EURGBP",
-    "USDIDR-OTCq", "USDINR-OTCq", "USDBDT-OTCq", "USDBRL-OTCq", "EURJPY-OTCq"
+    "EURUSD-OTC", "GBPUSD-OTC", "USDJPY-OTC", "AUDUSD-OTC", "EURGBP-OTC"
 ]
+# =====================================================================
 
-# সেশন অনুযায়ী রিয়েল-টাইম কাউন্টিং ভেরিয়েবল (১, ২, ৩ করে বাড়বে)
 session_wins = 0
 session_losses = 0
 last_was_loss = False
 
-# Render Web Service-এ ২৪ ঘণ্টা লাইভ রাখার জন্য ব্যাকগ্রাউন্ড পোর্ট সার্ভার
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -64,32 +61,31 @@ def start_keep_alive_server():
     server.serve_forever()
 
 def generate_session_banner(is_start=True, filename="session_banner.png"):
-    width, height = 650, 320
-    bg_color = (12, 28, 18) if is_start else (38, 12, 12)
+    width, height = 800, 400
+    bg_color = (8, 22, 12) if is_start else (32, 8, 8)
     img = Image.new("RGB", (width, height), bg_color)
     draw = ImageDraw.Draw(img)
     
-    border_color = (0, 230, 90) if is_start else (240, 40, 40)
-    draw.rectangle([12, 12, width-12, height-12], outline=border_color, width=3)
+    border_color = (0, 255, 90) if is_start else (255, 30, 30)
+    draw.rectangle([18, 18, width-18, height-18], outline=border_color, width=5)
     
     title_text = "TRADER RAHAT | TR VIP 999"
     main_text = "SESSION STARTS" if is_start else "SESSION ENDS"
     
     try:
-        font_small = ImageFont.truetype("arialbd.ttf", 24)
-        font_large = ImageFont.truetype("arialbd.ttf", 56)
+        font_small = ImageFont.truetype("arialbd.ttf", 30)
+        font_large = ImageFont.truetype("arialbd.ttf", 72)
     except Exception:
         font_small = ImageFont.load_default()
         font_large = ImageFont.load_default()
         
-    draw.text((60, 65), title_text, fill=(220, 220, 220), font=font_small)
-    draw.text((60, 135), main_text, fill=border_color, font=font_large)
+    draw.text((75, 90), title_text, fill=(245, 245, 245), font=font_small)
+    draw.text((75, 175), main_text, fill=border_color, font=font_large)
     
     img.save(filename)
     return filename
 
 def create_market_setup(direction):
-    """সিগন্যাল এবং রেজাল্টের চার্ট যেন একই থাকে, তাই ক্যান্ডেল ডাটা আগে থেকেই তৈরি করে রাখা হয়"""
     num_candles = 40
     prices = [100.0]
     for _ in range(num_candles):
@@ -116,9 +112,9 @@ def create_market_setup(direction):
     lows = [min(o, c) - random.uniform(0.15, 0.55) for o, c in zip(opens, closes)]
     
     if direction == "CALL":
-        lows[-2] = support_level - 0.18  # সাপোর্ট রিজেকশন উইক
+        lows[-2] = support_level - 0.18
     else:
-        highs[-2] = resistance_level + 0.18  # রেজিস্ট্যান্স রিজেকশন উইক
+        highs[-2] = resistance_level + 0.18
         
     return {
         "opens": opens,
@@ -143,7 +139,6 @@ def render_snr_chart(pair, timeframe, direction, setup_data, is_result=False, ou
     entry_index = len(opens) - 1
     entry_price = closes[-1]
     
-    # যদি এটি লাইভ রেজাল্টের স্ক্রিনশট হয়, তবে একই চার্টের শেষে ট্রেডের ফলাফল ক্যান্ডেল যুক্ত হবে
     if is_result:
         for step in range(3):
             o_val = closes[-1]
@@ -174,13 +169,11 @@ def render_snr_chart(pair, timeframe, direction, setup_data, is_result=False, ou
             height = 0.05
         ax.bar(i, height, bottom=opens[i], width=0.62, color=color, edgecolor=color)
 
-    # বলিঙ্গার ব্যান্ড লাইন
     upper_band = [max(highs[max(0, i-4):i+1]) + 0.35 for i in range(num_candles)]
     lower_band = [min(lows[max(0, i-4):i+1]) - 0.35 for i in range(num_candles)]
     ax.plot(range(num_candles), upper_band, color='#ff9100', linewidth=0.9, alpha=0.6)
     ax.plot(range(num_candles), lower_band, color='#00b0ff', linewidth=0.9, alpha=0.6)
 
-    # Strong Resistance & Support Zone অঙ্কন
     ax.axhline(resistance_level, color='#ff1744', linestyle='--', linewidth=1.3, alpha=0.85)
     ax.axhspan(resistance_level - 0.15, resistance_level + 0.25, color='#ff1744', alpha=0.12)
     ax.text(1, resistance_level + 0.3, "STRONG RESISTANCE (SNR)", color='#ff5252', fontsize=8, fontweight='bold')
@@ -189,7 +182,6 @@ def render_snr_chart(pair, timeframe, direction, setup_data, is_result=False, ou
     ax.axhspan(support_level - 0.25, support_level + 0.15, color='#00e676', alpha=0.12)
     ax.text(1, support_level - 0.55, "STRONG SUPPORT (SNR)", color='#69f0ae', fontsize=8, fontweight='bold')
     
-    # সিগন্যাল অ্যারো ও এন্ট্রি লাইন
     arrow_char = '⬆' if direction == "CALL" else '⬇'
     arrow_pos = lows[entry_index] - 0.75 if direction == "CALL" else highs[entry_index] + 0.55
     ax.annotate(arrow_char, xy=(entry_index, arrow_pos), color='#ffd600', fontsize=14, ha='center', fontweight='bold')
@@ -198,7 +190,7 @@ def render_snr_chart(pair, timeframe, direction, setup_data, is_result=False, ou
         ax.axhline(entry_price, color='#ffd600', linestyle=':', linewidth=1.0, alpha=0.8)
         
     ax.axhline(closes[-1], color='#00b0ff', linestyle='-', linewidth=0.9)
-    status_tag = "LIVE RESULT" if is_result else "SNR + BOLLINGER SETUP"
+    status_tag = "LIVE RESULT" if is_result else "1M CHART | 3M EXPIRATION"
     ax.text(0.01, 0.96, f"{pair} | {timeframe} (UTC+6) | {status_tag}", transform=ax.transAxes, color='#e0e0e0', fontsize=9.5, fontweight='bold', va='top')
     
     ax.grid(color='#1e2430', linestyle=':', linewidth=0.6)
@@ -215,25 +207,25 @@ def render_snr_chart(pair, timeframe, direction, setup_data, is_result=False, ou
     return filename
 
 def generate_result_sticker(is_win, filename="sticker.webp"):
-    width, height = 420, 140
-    bg_color = (0, 165, 30) if is_win else (210, 20, 25)
+    width, height = 450, 160
+    bg_color = (0, 175, 30) if is_win else (220, 20, 25)
     text_str = "WIN" if is_win else "LOSS"
     
     img = Image.new("RGBA", (width, height), bg_color)
     draw = ImageDraw.Draw(img)
     
-    r = 16
-    draw.ellipse((45 - r, height//2 - r, 45 + r, height//2 + r), fill=(255, 255, 255))
-    draw.ellipse((width - 45 - r, height//2 - r, width - 45 + r, height//2 + r), fill=(255, 255, 255))
+    r = 20
+    draw.ellipse((50 - r, height//2 - r, 50 + r, height//2 + r), fill=(255, 255, 255))
+    draw.ellipse((width - 50 - r, height//2 - r, width - 50 + r, height//2 + r), fill=(255, 255, 255))
     
     try:
-        font = ImageFont.truetype("arialbd.ttf", 58)
+        font = ImageFont.truetype("arialbd.ttf", 78)
     except Exception:
         font = ImageFont.load_default()
         
     bbox = draw.textbbox((0, 0), text_str, font=font)
     text_x = (width - (bbox[2] - bbox[0])) // 2
-    text_y = (height - (bbox[3] - bbox[1])) // 2 - 8
+    text_y = (height - (bbox[3] - bbox[1])) // 2 - 10
     draw.text((text_x, text_y), text_str, fill=(255, 255, 255), font=font)
     img.save(filename, "WEBP")
     return filename
@@ -242,8 +234,8 @@ def broadcast_photo(photo_path, caption, with_buttons=True):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
     reply_markup = {
         "inline_keyboard": [[
-            {"text": "অফিশিয়াল চ্যানেল ↗", "url": CHANNEL_LINK},
-            {"text": "ভিআইপি রেজিস্ট্রেশন ↗", "url": REGISTER_LINK}
+            {"text": "Official Channel ↗", "url": CHANNEL_LINK},
+            {"text": "VIP Registration ↗", "url": REGISTER_LINK}
         ]]
     }
     for chat_id in TARGET_CHATS:
@@ -269,8 +261,8 @@ def broadcast_text(text, with_button=False):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     reply_markup = {
         "inline_keyboard": [[
-            {"text": "অফিশিয়াল চ্যানেল ↗", "url": CHANNEL_LINK},
-            {"text": "ভিআইপি রেজিস্ট্রেশন ↗", "url": REGISTER_LINK}
+            {"text": "Official Channel ↗", "url": CHANNEL_LINK},
+            {"text": "VIP Registration ↗", "url": REGISTER_LINK}
         ]]
     }
     for chat_id in TARGET_CHATS:
@@ -283,7 +275,6 @@ def broadcast_text(text, with_button=False):
             print(f"Text send error: {e}")
 
 def wait_until(target_dt, tz):
-    """নির্দিষ্ট সময় (সেকেন্ড) পর্যন্ত নিখুঁতভাবে অপেক্ষা করার ফাংশন"""
     while True:
         now = datetime.datetime.now(tz)
         remaining = (target_dt - now).total_seconds()
@@ -294,9 +285,8 @@ def wait_until(target_dt, tz):
 def run_vip_trading_bot():
     global session_wins, session_losses, last_was_loss
     print("=====================================================")
-    print(f"🚀 {VIP_HEADER} বট সঠিকভাবে চালু হয়েছে!")
-    print("⏰ সেশন টাইম: সকাল ১০:০০, দুপুর ২:০০, রাত ৮:০০ (UTC+6)")
-    print("⚡ অ্যাডভান্স সিগন্যাল: ট্রেড শুরুর ঠিক ২ মিনিট (২ ক্যান্ডেল) আগে সিগন্যাল যাবে!")
+    print(f"🚀 {VIP_HEADER} Bot successfully started!")
+    print("⏰ Session Times: 10:00 AM, 02:00 PM, 08:00 PM (UTC+6)")
     print("=====================================================")
     
     current_session_date = None
@@ -322,7 +312,6 @@ def run_vip_trading_bot():
             
         active_hours = [10, 14, 20]
         
-        # ১. সেশন শুরুর ৩০ মিনিট আগে রিমাইন্ডার (৯:৩০, ১:৩০, ৭:৩০)
         for h in active_hours:
             remind_hour = h - 1
             if current_hour == remind_hour and 30 <= current_minute <= 32 and not reminder_sent[h]:
@@ -330,14 +319,12 @@ def run_vip_trading_bot():
                 broadcast_text(
                     f"{VIP_HEADER}\n"
                     f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                    f"🔔 ভিআইপি সেশন রিমাইন্ডার\n\n"
-                    f"প্রিয় ভিআইপি সদস্যগণ, আগামী ৩০ মিনিটের মধ্যে আমাদের হাই-অ্যাকুরেসি সাপোর্ট ও রেজিস্ট্যান্স ট্রেডিং সেশন শুরু হতে যাচ্ছে!\n\n"
+                    f"🔔 VIP Session Reminder\n\n"
+                    f"প্রিয় ভিআইপি সদস্যগণ, আগামী ৩০ মিনিটের মধ্যে আমাদের হাই-অ্যাকুরেসি সাপোর্ট ও রেজিস্ট্যান্স ট্রেডিং সেশন শুরু হতে যাচ্ছে!\n\n"
                     f"সবাই দ্রুত ব্রোকারে লগইন করে প্রস্তুত হয়ে যান।",
                     with_button=True
                 )
-                print(f"[{now.strftime('%H:%M:%S')}] 🔔 সেশন রিমাইন্ডার পাঠানো হয়েছে।")
                 
-        # ২. সেশন শুরুর ৫ মিনিট আগে (৯:৫৫, ১:৫৫, ৭:৫৫) বা সেশন চলাকালীন চালু করলে স্টার্ট ব্যানার ও রুলস
         for h in active_hours:
             is_pre_session = (current_hour == h - 1 and current_minute >= 55)
             is_in_session = (current_hour == h and session_signals_sent[h] == 0)
@@ -352,81 +339,70 @@ def run_vip_trading_bot():
                 broadcast_photo(
                     banner,
                     f"{VIP_HEADER}\n"
-                    f"🟢 [ সেশন শুরু হচ্ছে ] 🟢\n\n"
-                    f"প্রিয় মেম্বারগণ, আমাদের অফিশিয়াল ট্রেডিং সেশন এখনই শুরু হচ্ছে! প্রতিটি সিগন্যাল ট্রেড শুরুর ঠিক ২ মিনিট আগে দেওয়া হবে, সবাই প্রস্তুত থাকুন।",
+                    f"🟢 [ SESSION STARTS ] 🟢\n\n"
+                    f"প্রিয় সদস্যবৃন্দ, আমাদের অফিশিয়াল ট্রেডিং সেশন এখনই শুরু হচ্ছে! সবাই হাই-অ্যাকুরেসি এসএনআর (SNR) সিগন্যালের জন্য প্রস্তুত থাকুন।",
                     with_buttons=True
                 )
                 time.sleep(2)
                 broadcast_text(VIP_RULES_TEXT, with_button=True)
-                print(f"[{now.strftime('%H:%M:%S')}] 🟢 সেশন স্টার্ট ব্যানার ও রুলস পাঠানো হয়েছে!")
                 
-        # সেশন অ্যাক্টিভেশন চেক
         if current_hour in active_hours and session_signals_sent[current_hour] < session_target_limit[current_hour]:
             active_session_hour = current_hour
             
-        # ৩. মূল ট্রেডিং সেশন (একবার শুরু হলে ৫টি ট্রেড শেষ না হওয়া পর্যন্ত চলবে)
         if active_session_hour is not None:
             sent_count = session_signals_sent[active_session_hour]
             target_count = session_target_limit[active_session_hour]
             
             if sent_count < target_count:
-                # প্রথম সিগন্যাল দ্রুত যাবে, পরেরগুলো হাই-কোয়ালিটি সেটআপের জন্য ফ্লেক্সিবল বিরতি নেবে
                 if sent_count == 0:
-                    scan_wait = random.randint(20, 45)
+                    scan_wait = random.randint(15, 30)
                 else:
                     scan_wait = random.randint(240, 420)
                     
-                print(f"[{now.strftime('%H:%M:%S')}] 🔍 সিগন্যাল #{sent_count+1} এর জন্য সাপোর্ট-রেজিস্ট্যান্স লেভেল স্ক্যান চলছে ({scan_wait} সেকেন্ড)...")
                 time.sleep(scan_wait)
                 
-                # নতুন ক্যান্ডেলের শুরুতে সিগন্যাল পাঠানোর জন্য সিঙ্ক করা হচ্ছে
                 sig_now = datetime.datetime.now(tz)
                 if sig_now.second > 10:
                     next_min = (sig_now + datetime.timedelta(minutes=1)).replace(second=2, microsecond=0)
                     wait_until(next_min, tz)
                 
                 sig_now = datetime.datetime.now(tz)
-                # কমপক্ষে ২ মিনিট (২ ক্যান্ডেল) পরের এন্ট্রি টাইম নির্ধারণ (যেমন ১০:০৪ এ সিগন্যাল গেলে এন্ট্রি হবে ১০:০৬ এ)
                 entry_time_obj = (sig_now + datetime.timedelta(minutes=2)).replace(second=0, microsecond=0)
                 timetable = entry_time_obj.strftime("%H:%M")
                 
                 exp_minutes = 3
-                expiration = "৩ মিনিট (M3)"
+                expiration = "3 Minutes (M3 on 1M Chart)"
                 exit_time_obj = entry_time_obj + datetime.timedelta(minutes=exp_minutes)
                 timeset = exit_time_obj.strftime("%H:%M")
                 
                 asset = random.choice(HIGH_PAYOUT_PAIRS)
-                payout_percent = random.randint(88, 95)
                 direction = random.choice(["CALL", "PUT"])
                 
                 if direction == "CALL":
-                    dir_line = "🟢 দিক -» আপ / কল (UP) ⬆"
-                    snr_reason = "শক্তিশালী সাপোর্ট রিজেকশন ও বলিঙ্গার ব্যান্ড"
+                    dir_line = "🟢 Direction -» UP / CALL (UP) ⬆"
+                    snr_reason = "Strong Support Rejection & Bollinger Band"
                 else:
-                    dir_line = "🔴 দিক -» ডাউন / পুট (DOWN) ⬇"
-                    snr_reason = "শক্তিশালী রেজিস্ট্যান্স রিজেকশন ও বলিঙ্গার ব্যান্ড"
+                    dir_line = "🔴 Direction -» DOWN / PUT (DOWN) ⬇"
+                    snr_reason = "Strong Resistance Rejection & Bollinger Band"
                 
-                # চার্ট ডাটা তৈরি এবং সিগন্যালের স্ক্রিনশট জেনারেট
                 market_setup = create_market_setup(direction)
                 chart_file = render_snr_chart(asset, "M3", direction, market_setup, is_result=False, filename="signal_chart.png")
                 
                 signal_caption = (
                     f"{VIP_HEADER}\n\n"
-                    f"====== ভিআইপি সিগন্যাল ======\n"
+                    f"====== VIP SIGNAL ======\n"
                     f"╭───────────────⋅•⋅⊰∙∘☽\n"
-                    f"🐉 পেয়ার -» {asset} ({payout_percent}%)\n"
-                    f"🕒 এন্ট্রি টাইম -» {timetable} (UTC+6)\n"
-                    f"⏰ টাইম সেট -» {timeset}\n"
-                    f"⏳ মেয়াদকাল -» {expiration}\n"
-                    f"📊 অ্যানালাইসিস -» {snr_reason}\n"
+                    f"🐉 Pair -» {asset}\n"
+                    f"🕒 Entry Time -» {timetable} (UTC+6)\n"
+                    f"⏰ Time Set -» {timeset}\n"
+                    f"⏳ Expiration -» {expiration}\n"
+                    f"📊 Analysis -» {snr_reason}\n"
                     f"{dir_line}\n"
                     f"╰───────────────⋅•⋅⊰∙∘☽\n\n"
-                    f"⏳ হাতে ২ মিনিট সময় আছে, পেয়ার ও টাইম সেট করে প্রস্তুত থাকুন!"
+                    f"⏳ হাতে ২ মিনিট সময় আছে, ১ মিনিটের চার্ট ওপেন করে পেয়ার ও ৩ মিনিটের টাইম সেট করে প্রস্তুত থাকুন!"
                 )
                 broadcast_photo(chart_file, signal_caption, with_buttons=True)
-                print(f"[{datetime.datetime.now(tz).strftime('%H:%M:%S')}] 📤 সিগন্যাল #{sent_count+1} পাঠানো হয়েছে (২ মিনিট আগে): {asset} | এন্ট্রি: {timetable} | শেষ: {timeset}")
                 
-                # Zero Consecutive Loss Protection: আগের ট্রেড লস হলে পরেরটি ১০০% উইন হবে
                 if last_was_loss:
                     outcome = random.choices(["DIRECT_WIN", "MTG_WIN"], weights=[90, 10], k=1)[0]
                     last_was_loss = False
@@ -435,52 +411,46 @@ def run_vip_trading_bot():
                     if outcome == "LOSS":
                         last_was_loss = True
                         
-                # নিখুঁতভাবে ট্রেড শেষ হওয়ার সময় (exit_time_obj) পর্যন্ত অপেক্ষা করবে
                 wait_until(exit_time_obj + datetime.timedelta(seconds=2), tz)
                 
-                # যদি ১-স্টেপ MTG লাগে, তবে পরবর্তী ৩ মিনিট শেষ হওয়া পর্যন্ত অপেক্ষা করে রেজাল্ট দেবে
                 if outcome in ["MTG_WIN", "LOSS"]:
                     mtg_exit_obj = exit_time_obj + datetime.timedelta(minutes=exp_minutes)
-                    print(f"[{datetime.datetime.now(tz).strftime('%H:%M:%S')}] ⏳ ১-স্টেপ মার্টিনগেল রানিং (রেজাল্ট যাবে {mtg_exit_obj.strftime('%H:%M')} এ)...")
                     wait_until(mtg_exit_obj + datetime.timedelta(seconds=2), tz)
                     
                 if outcome == "DIRECT_WIN":
                     session_wins += 1
                     is_win = True
-                    res_status = "- ✅✅✅ সরাসরি জিত (WIN) ✅✅✅"
+                    res_status = "- ✅✅✅ Direct Win (WIN) ✅✅✅"
                 elif outcome == "MTG_WIN":
                     session_wins += 1
                     is_win = True
-                    res_status = "- ✅✅✅ ১-স্টেপ মার্টিনগেল জিত (MTG WIN¹) ✅✅✅"
+                    res_status = "- ✅✅✅ 1-Step Martingale Win (MTG WIN¹) ✅✅✅"
                 else:
                     session_losses += 1
                     is_win = False
-                    res_status = "- ❎✖️💀 লস ট্রেড (LOSS) 💀✖️❎"
+                    res_status = "- ❎✖️💀 Loss Trade (LOSS) 💀✖️❎"
                     
                 total_session_trades = session_wins + session_losses
                 session_win_rate = int((session_wins / total_session_trades) * 100) if total_session_trades > 0 else 0
                 
-                # ঠিক একই চার্টের ধারাবাহিক লাইভ রেজাল্ট স্ক্রিনশট জেনারেট
                 res_chart = render_snr_chart(asset, "M3", direction, market_setup, is_result=True, outcome=outcome, filename="result_chart.png")
                 res_caption = (
                     f"{VIP_HEADER}\n\n"
-                    f"====== লাইভ রেজাল্ট ======\n"
+                    f"====== LIVE RESULT ======\n"
                     f"╭───────────────⋅•⋅⊰∙∘☽\n"
-                    f"🐉 পেয়ার: {asset} | 🕒 এন্ট্রি: {timetable} (সেট: {timeset})\n"
+                    f"🐉 Pair: {asset} | 🕒 Entry: {timetable} (Set: {timeset})\n"
                     f"╰───────────────⋅•⋅⊰∙∘☽\n\n"
                     f"{res_status}\n\n"
                     f"╭───────────────⋅•⋅⊰∙∘☽\n"
-                    f"🚀 জিত: {session_wins} | লস: {session_losses} -◆- ({session_win_rate}%)\n"
+                    f"🚀 Win: {session_wins} | Loss: {session_losses} -◆- ({session_win_rate}%)\n"
                     f"╰───────────────⋅•⋅⊰∙∘☽\n\n"
-                    f"📳 লাইভ চার্টের ফলাফল সফলভাবে আপডেট হয়েছে"
+                    f"📳 Live chart result updated successfully"
                 )
                 broadcast_photo(res_chart, res_caption, with_buttons=True)
                 broadcast_sticker(generate_result_sticker(is_win))
-                print(f"[{datetime.datetime.now(tz).strftime('%H:%M:%S')}] ✅ রেজাল্ট #{sent_count+1} প্রকাশিত: জিত {session_wins} | লস {session_losses} ({session_win_rate}%)")
                 
                 session_signals_sent[active_session_hour] += 1
                 
-                # ৫টি সিগন্যাল শেষ হলে সেশন সমাপ্ত ব্যানার ও সামারি যাবে
                 if session_signals_sent[active_session_hour] >= target_count:
                     time.sleep(5)
                     end_banner = generate_session_banner(is_start=False)
@@ -488,24 +458,22 @@ def run_vip_trading_bot():
                     s_rate = int((session_wins / s_total) * 100) if s_total > 0 else 0
                     end_msg = (
                         f"{VIP_HEADER}\n"
-                        f"🔴 [ সেশন সমাপ্ত ] 🔴\n"
+                        f"🔴 [ SESSION ENDS ] 🔴\n"
                         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                        f"📊 সেশনের চূড়ান্ত ফলাফল:\n"
-                        f"• মোট সিগন্যাল: {s_total} টি\n"
-                        f"• সফল ট্রেড (জিত): {session_wins} টি ✅\n"
-                        f"• অসফল ট্রেড (লস): {session_losses} টি ❌\n"
-                        f"• সেশনের সঠিকতা: {s_rate}% 🎯\n"
+                        f"📊 Session Summary:\n"
+                        f"• Total Signals: {s_total}\n"
+                        f"• Successful Trades (Win): {session_wins} ✅\n"
+                        f"• Failed Trades (Loss): {session_losses} ❌\n"
+                        f"• Session Accuracy: {s_rate}% 🎯\n"
                         f"━━━━━━━━━━━━━━━━━━━━━━\n"
                         f"আজকের সেশনটি সফলভাবে সম্পন্ন হয়েছে। পরবর্তী সেশনে আবার সবার সাথে দেখা হবে!"
                     )
                     broadcast_photo(end_banner, end_msg, with_buttons=True)
-                    print(f"[{datetime.datetime.now(tz).strftime('%H:%M:%S')}] 🔴 সেশন সফলভাবে সমাপ্ত হয়েছে!")
                     active_session_hour = None
             else:
                 active_session_hour = None
                 time.sleep(30)
         else:
-            print(f"[{now.strftime('%H:%M:%S')} UTC+6] ⏳ পরবর্তী সেশনের অপেক্ষায় (৯:৫৫ / ১:৫৫ / ৭:৫৫)...", end="\r")
             time.sleep(20)
 
 if __name__ == "__main__":
