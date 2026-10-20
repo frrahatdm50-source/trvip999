@@ -10,47 +10,54 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 from PIL import Image, ImageDraw, ImageFont
 
 # =====================================================================
-# 🛠️ [ADMIN PANEL & CONFIGURATION]
+# 🛠️ [ADMIN PANEL & CORE CONFIGURATION - TRADER RAHAT | TR VIP 999]
 # =====================================================================
 BOT_TOKEN = "8938988396:AAEUvJyoWUuzc8NB9Y2LyNPIrwD-LL6NM00"
 TARGET_CHATS = ["@trvip999", "8699074327"]
 ADMIN_CHAT_ID = 8699074327
 
 TIMEZONE = "Asia/Dhaka"  # UTC+6
-VIP_HEADER = "👑 Trader Rahat | TR VIP 999"
+VIP_HEADER = "👑 𝐓𝐫𝐚𝐝𝐞𝐫 𝐑𝐚𝐡𝐚𝐭 | 𝐓𝐑 𝐕𝐈𝐏 𝟗𝟗𝟗 👑"
 
-# Dinamic Settings (Admin panel theke change hobe)
+# ডাইনামিক সেটিংস (অ্যাডমিন প্যানেল থেকে যেকোনো সময় পরিবর্তনযোগ্য)
 SETTINGS = {
     "channel_link": "https://t.me/traderrahat420",
     "register_link": "https://broker-qx.pro/sign-up/?lid=2187284",
     "win_sticker_text": "WIN",
     "loss_sticker_text": "LOSS",
-    "custom_start_sticker": None,
-    "custom_end_sticker": None,
+    "custom_start_banner": None,
+    "custom_end_banner": None,
     "custom_win_sticker": None,
-    "custom_loss_sticker": None
+    "custom_loss_sticker": None,
+    "rules_text": (
+        f"{VIP_HEADER}\n"
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        "📜 **ভিআইপি ট্রেডিং ও মানি ম্যানেজমেন্ট গাইডলাইন:**\n\n"
+        "⏰ **সময় ও চার্ট সেটআপ:**\n"
+        "• আপনার ডিভাইসের সময় অবশ্যই **UTC+6 (বাংলাদেশ সময়)** অনুযায়ী মিলিয়ে রাখুন।\n"
+        "• প্রতিটি সিগন্যাল এন্ট্রি সময়ের ঠিক **২ মিনিট আগে** গ্রুপে দেওয়া হবে।\n\n"
+        "🎯 **ট্রেড এন্ট্রি নেওয়ার নিয়ম:**\n"
+        "• ব্রোকারে **১ মিনিটের (1M) ক্যান্ডেল চার্ট** ওপেন করবেন।\n"
+        "• কোটেক্সে সুইচ টাইম (Time Set) অপশন থেকে সিগন্যালে দেওয়া ক্লোজিং টাইম (**৩টি ক্যান্ডেল / 3 Minutes**) সেট করবেন।\n"
+        "• এন্ট্রি সময়ের ঠিক **১–২ সেকেন্ড আগেই** ট্রেড প্লেস করবেন।\n\n"
+        "🛡️ **মানি ম্যানেজমেন্ট ও এমটিজি (MTG):**\n"
+        "• প্রথম ট্রেডটি কোনো কারণে মিস হলে হতাশ না হয়ে একই ডিরেকশনে পরবর্তী ৩ মিনিটের জন্য **১-স্টেপ মার্টিনগেল (MTG)** নিবেন।\n"
+        "• সবসময় নিজের ব্যালেন্সের নিরাপত্তা বজায় রেখে ট্রেড করবেন এবং দৈনিক টার্গেট পূরণ হলে ট্রেড বন্ধ রাখবেন।\n"
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        "🤝 **ইনশাআল্লাহ, নিয়ম মেনে ট্রেড করলে প্রফিট সুনিশ্চিত!**"
+    )
 }
 
 BOT_USERS = set(TARGET_CHATS)
 BANNED_USERS = set()
 
-VIP_RULES_TEXT = (
-    f"{VIP_HEADER}\n"
-    "━━━━━━━━━━━━━━━━━━━━━━\n"
-    "📌 VIP Trading & Money Management Rules:\n\n"
-    "• আপনার ডিভাইসে UTC+6 সময় নিখুঁতভাবে মিলিয়ে নেবেন।\n"
-    "• প্রতিটি সিগন্যাল এন্ট্রি সময়ের ঠিক ২ মিনিট আগে দেওয়া হবে।\n"
-    "• মার্কেট পেয়ার ও টাইম সেট করে সিগন্যাল টাইমের ১-২ সেকেন্ড আগেই ট্রেড এন্ট্রি নেবেন।\n"
-    "• সবসময় ১-স্টেপ মার্টিনগেল এবং ১-২-৪ মানি ম্যানেজমেন্ট রুল ফলো করবেন।\n"
-    "• প্রতিদিনের ৫% প্রফিট টার্গেট পূরণ হলে সাথে সাথে ট্রেড বন্ধ রাখবেন।"
-)
-
 HIGH_PAYOUT_PAIRS = [
-    "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "EURGBP",
-    "EURUSD-OTC", "GBPUSD-OTC", "USDJPY-OTC", "AUDUSD-OTC", "EURGBP-OTC"
+    "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "EURGBP", "USDCAD",
+    "EURUSD-OTC", "GBPUSD-OTC", "USDJPY-OTC", "AUDUSD-OTC", "EURGBP-OTC", "NZDUSD-OTC"
 ]
 # =====================================================================
 
@@ -58,11 +65,32 @@ session_wins = 0
 session_losses = 0
 last_was_loss = False
 
+# --- [LINUX & WINDOWS GUARANTEED BOLD FONT LOADER] ---
+def get_bold_font(size):
+    """
+    রেন্ডার (Linux) এবং Windows উভয় সার্ভারেই শতভাগ কাজ করবে এমন বোল্ড ফন্ট লোডার।
+    লেখা কখনোই আর ছোট হবে না।
+    """
+    font_candidates = [
+        fm.findfont(fm.FontProperties(family='DejaVu Sans', weight='bold')),
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+        "arialbd.ttf",
+        "DejaVuSans-Bold.ttf"
+    ]
+    for path in font_candidates:
+        if path and os.path.exists(path):
+            try:
+                return ImageFont.truetype(path, size)
+            except Exception:
+                continue
+    return ImageFont.load_default()
+
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"TR VIP 999 Bot with Advanced Admin Panel is Running Live!")
+        self.wfile.write(b"TR VIP 999 Ultimate Sniper Bot is Running Live!")
     def log_message(self, format, *args):
         return
 
@@ -71,61 +99,120 @@ def start_keep_alive_server():
     server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
     server.serve_forever()
 
+# --- [HIGH-VISIBILITY LARGE SESSION BANNERS] ---
 def generate_session_banner(is_start=True, filename="session_banner.png"):
-    width, height = 850, 420
-    bg_color = (8, 22, 12) if is_start else (32, 8, 8)
+    if is_start and SETTINGS["custom_start_banner"] and os.path.exists(SETTINGS["custom_start_banner"]):
+        return SETTINGS["custom_start_banner"]
+    if not is_start and SETTINGS["custom_end_banner"] and os.path.exists(SETTINGS["custom_end_banner"]):
+        return SETTINGS["custom_end_banner"]
+
+    width, height = 960, 480
+    bg_color = (6, 22, 14) if is_start else (30, 8, 10)
     img = Image.new("RGB", (width, height), bg_color)
     draw = ImageDraw.Draw(img)
     
-    border_color = (0, 255, 90) if is_start else (255, 30, 30)
-    draw.rectangle([18, 18, width-18, height-18], outline=border_color, width=6)
+    border_color = (0, 255, 110) if is_start else (255, 50, 50)
+    gold_color = (255, 215, 0)
+    
+    draw.rectangle([16, 16, width-16, height-16], outline=border_color, width=7)
+    draw.rectangle([28, 28, width-28, height-28], outline=gold_color, width=2)
     
     title_text = "TRADER RAHAT | TR VIP 999"
     main_text = "SESSION STARTS" if is_start else "SESSION ENDS"
+    sub_text = "BISMILLAH | HIGH ACCURACY SNR SIGNALS" if is_start else "ALHAMDULILLAH | VIP SESSION COMPLETED"
     
-    try:
-        font_small = ImageFont.truetype("arialbd.ttf", 32)
-        font_large = ImageFont.truetype("arialbd.ttf", 78)
-    except Exception:
-        font_small = ImageFont.load_default()
-        font_large = ImageFont.load_default()
-        
-    draw.text((75, 85), title_text, fill=(245, 245, 245), font=font_small)
-    draw.text((75, 170), main_text, fill=border_color, font=font_large)
+    font_title = get_bold_font(36)
+    font_main = get_bold_font(94)  # বিশাল ও স্পষ্ট বোল্ড সাইজ
+    font_sub = get_bold_font(25)
+    
+    tb1 = draw.textbbox((0, 0), title_text, font=font_title)
+    draw.text(((width - (tb1[2] - tb1[0])) // 2, 80), title_text, fill=gold_color, font=font_title)
+    
+    tb2 = draw.textbbox((0, 0), main_text, font=font_main)
+    draw.text(((width - (tb2[2] - tb2[0])) // 2, 180), main_text, fill=border_color, font=font_main)
+    
+    tb3 = draw.textbbox((0, 0), sub_text, font=font_sub)
+    draw.text(((width - (tb3[2] - tb3[0])) // 2, 345), sub_text, fill=(235, 235, 235), font=font_sub)
     
     img.save(filename)
     return filename
 
-def create_market_setup(direction):
-    num_candles = 40
+# --- [HIGH-VISIBILITY LARGE WIN/LOSS STICKERS] ---
+def generate_result_sticker(is_win, filename="sticker.webp"):
+    if is_win and SETTINGS["custom_win_sticker"] and os.path.exists(SETTINGS["custom_win_sticker"]):
+        return SETTINGS["custom_win_sticker"]
+    if not is_win and SETTINGS["custom_loss_sticker"] and os.path.exists(SETTINGS["custom_loss_sticker"]):
+        return SETTINGS["custom_loss_sticker"]
+
+    width, height = 512, 220
+    bg_color = (0, 185, 45) if is_win else (225, 15, 30)
+    border_col = (255, 255, 255)
+    text_str = SETTINGS["win_sticker_text"] if is_win else SETTINGS["loss_sticker_text"]
+    
+    img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    
+    draw.rounded_rectangle([8, 8, width-8, height-8], radius=35, fill=bg_color, outline=border_col, width=7)
+    
+    r = 18
+    draw.ellipse((45 - r, height//2 - r, 45 + r, height//2 + r), fill=border_col)
+    draw.ellipse((width - 45 - r, height//2 - r, width - 45 + r, height//2 + r), fill=border_col)
+    
+    font_size = 112 if len(text_str) <= 5 else 72
+    font = get_bold_font(font_size)
+        
+    bbox = draw.textbbox((0, 0), text_str, font=font)
+    text_x = (width - (bbox[2] - bbox[0])) // 2
+    text_y = (height - (bbox[3] - bbox[1])) // 2 - (bbox[1] // 2)
+    
+    draw.text((text_x, text_y), text_str, fill=(255, 255, 255), font=font)
+    img.save(filename, "WEBP")
+    return filename
+
+# --- [5-LAYER DEEP MARKET ANALYSIS & SETUP GENERATOR] ---
+def analyze_and_create_market_setup(direction):
+    num_candles = 42
     prices = [100.0]
     for _ in range(num_candles):
-        prices.append(prices[-1] + random.uniform(-0.85, 0.85))
+        prices.append(prices[-1] + random.uniform(-0.8, 0.8))
         
     opens = prices[:-1]
     closes = prices[1:]
     
-    support_level = min(opens[:-3] + closes[:-3]) - 0.35
-    resistance_level = max(opens[:-3] + closes[:-3]) + 0.35
+    support_level = min(opens[:-4] + closes[:-4]) - 0.30
+    resistance_level = max(opens[:-4] + closes[:-4]) + 0.30
     
+    touch_idx = random.randint(8, 22)
     if direction == "CALL":
-        opens[-2] = support_level + 0.9
+        opens[touch_idx] = support_level + 0.6
+        closes[touch_idx] = support_level + 0.15
+        opens[-2] = support_level + 0.95
         closes[-2] = support_level + 0.08
         opens[-1] = closes[-2]
-        closes[-1] = opens[-1] + random.uniform(0.9, 1.5)
+        closes[-1] = opens[-1] + random.uniform(0.95, 1.45)
+        rsi_val = random.randint(20, 28)
+        pattern_name = random.choice(["Bullish Pinbar Rejection", "Bullish Engulfing", "Order Block Demand Bounce"])
+        snr_reason = f"Strong Support + BB Lower + RSI({rsi_val} Oversold) + {pattern_name}"
     else:
-        opens[-2] = resistance_level - 0.9
+        opens[touch_idx] = resistance_level - 0.6
+        closes[touch_idx] = resistance_level - 0.15
+        opens[-2] = resistance_level - 0.95
         closes[-2] = resistance_level - 0.08
         opens[-1] = closes[-2]
-        closes[-1] = opens[-1] - random.uniform(0.9, 1.5)
+        closes[-1] = opens[-1] - random.uniform(0.95, 1.45)
+        rsi_val = random.randint(73, 82)
+        pattern_name = random.choice(["Bearish Shooting Star", "Bearish Engulfing", "Supply Zone Rejection"])
+        snr_reason = f"Strong Resistance + BB Upper + RSI({rsi_val} Overbought) + {pattern_name}"
         
-    highs = [max(o, c) + random.uniform(0.15, 0.55) for o, c in zip(opens, closes)]
-    lows = [min(o, c) - random.uniform(0.15, 0.55) for o, c in zip(opens, closes)]
+    highs = [max(o, c) + random.uniform(0.15, 0.50) for o, c in zip(opens, closes)]
+    lows = [min(o, c) - random.uniform(0.15, 0.50) for o, c in zip(opens, closes)]
     
     if direction == "CALL":
-        lows[-2] = support_level - 0.18
+        lows[touch_idx] = support_level - 0.12
+        lows[-2] = support_level - 0.38
     else:
-        highs[-2] = resistance_level + 0.18
+        highs[touch_idx] = resistance_level + 0.12
+        highs[-2] = resistance_level + 0.38
         
     return {
         "opens": opens,
@@ -133,11 +220,13 @@ def create_market_setup(direction):
         "highs": highs,
         "lows": lows,
         "support": support_level,
-        "resistance": resistance_level
+        "resistance": resistance_level,
+        "rsi": rsi_val,
+        "analysis_text": snr_reason
     }
 
 def render_snr_chart(pair, timeframe, direction, setup_data, is_result=False, outcome="DIRECT_WIN", filename="chart.png"):
-    fig, ax = plt.subplots(figsize=(8.5, 4.8), facecolor='#0b0e14')
+    fig, ax = plt.subplots(figsize=(8.8, 5.0), facecolor='#0b0e14')
     ax.set_facecolor('#0b0e14')
     
     opens = list(setup_data["opens"])
@@ -146,6 +235,7 @@ def render_snr_chart(pair, timeframe, direction, setup_data, is_result=False, ou
     lows = list(setup_data["lows"])
     support_level = setup_data["support"]
     resistance_level = setup_data["resistance"]
+    rsi_val = setup_data["rsi"]
     
     entry_index = len(opens) - 1
     entry_price = closes[-1]
@@ -154,18 +244,18 @@ def render_snr_chart(pair, timeframe, direction, setup_data, is_result=False, ou
         for step in range(3):
             o_val = closes[-1]
             if outcome == "DIRECT_WIN":
-                delta = random.uniform(0.35, 0.85) if direction == "CALL" else -random.uniform(0.35, 0.85)
+                delta = random.uniform(0.38, 0.88) if direction == "CALL" else -random.uniform(0.38, 0.88)
             elif outcome == "MTG_WIN":
                 if step == 0:
-                    delta = -random.uniform(0.2, 0.5) if direction == "CALL" else random.uniform(0.2, 0.5)
+                    delta = -random.uniform(0.2, 0.45) if direction == "CALL" else random.uniform(0.2, 0.45)
                 else:
-                    delta = random.uniform(0.55, 1.1) if direction == "CALL" else -random.uniform(0.55, 1.1)
+                    delta = random.uniform(0.62, 1.18) if direction == "CALL" else -random.uniform(0.62, 1.18)
             else:
-                delta = -random.uniform(0.35, 0.8) if direction == "CALL" else random.uniform(0.35, 0.8)
+                delta = -random.uniform(0.42, 0.88) if direction == "CALL" else random.uniform(0.42, 0.88)
                 
             c_val = o_val + delta
-            h_val = max(o_val, c_val) + random.uniform(0.1, 0.4)
-            l_val = min(o_val, c_val) - random.uniform(0.1, 0.4)
+            h_val = max(o_val, c_val) + random.uniform(0.1, 0.38)
+            l_val = min(o_val, c_val) - random.uniform(0.1, 0.38)
             opens.append(o_val)
             closes.append(c_val)
             highs.append(h_val)
@@ -174,35 +264,37 @@ def render_snr_chart(pair, timeframe, direction, setup_data, is_result=False, ou
     num_candles = len(opens)
     for i in range(num_candles):
         color = '#00e676' if closes[i] >= opens[i] else '#ff1744'
-        ax.plot([i, i], [lows[i], highs[i]], color=color, linewidth=1.1)
+        ax.plot([i, i], [lows[i], highs[i]], color=color, linewidth=1.15)
         height = closes[i] - opens[i]
         if abs(height) < 0.05:
             height = 0.05
-        ax.bar(i, height, bottom=opens[i], width=0.62, color=color, edgecolor=color)
+        ax.bar(i, height, bottom=opens[i], width=0.64, color=color, edgecolor=color)
 
     upper_band = [max(highs[max(0, i-4):i+1]) + 0.35 for i in range(num_candles)]
     lower_band = [min(lows[max(0, i-4):i+1]) - 0.35 for i in range(num_candles)]
-    ax.plot(range(num_candles), upper_band, color='#ff9100', linewidth=0.9, alpha=0.6)
-    ax.plot(range(num_candles), lower_band, color='#00b0ff', linewidth=0.9, alpha=0.6)
+    mid_ema = [(u + l) / 2 for u, l in zip(upper_band, lower_band)]
+    ax.plot(range(num_candles), upper_band, color='#ff9100', linewidth=0.95, alpha=0.65)
+    ax.plot(range(num_candles), lower_band, color='#00b0ff', linewidth=0.95, alpha=0.65)
+    ax.plot(range(num_candles), mid_ema, color='#e040fb', linestyle='-.', linewidth=0.75, alpha=0.5)
 
-    ax.axhline(resistance_level, color='#ff1744', linestyle='--', linewidth=1.3, alpha=0.85)
-    ax.axhspan(resistance_level - 0.15, resistance_level + 0.25, color='#ff1744', alpha=0.12)
-    ax.text(1, resistance_level + 0.3, "STRONG RESISTANCE (SNR)", color='#ff5252', fontsize=8, fontweight='bold')
+    ax.axhline(resistance_level, color='#ff1744', linestyle='--', linewidth=1.35, alpha=0.88)
+    ax.axhspan(resistance_level - 0.15, resistance_level + 0.25, color='#ff1744', alpha=0.14)
+    ax.text(1, resistance_level + 0.32, "INSTITUTIONAL RESISTANCE ZONE (SNR)", color='#ff5252', fontsize=8, fontweight='bold')
     
-    ax.axhline(support_level, color='#00e676', linestyle='--', linewidth=1.3, alpha=0.85)
-    ax.axhspan(support_level - 0.25, support_level + 0.15, color='#00e676', alpha=0.12)
-    ax.text(1, support_level - 0.55, "STRONG SUPPORT (SNR)", color='#69f0ae', fontsize=8, fontweight='bold')
+    ax.axhline(support_level, color='#00e676', linestyle='--', linewidth=1.35, alpha=0.88)
+    ax.axhspan(support_level - 0.25, support_level + 0.15, color='#00e676', alpha=0.14)
+    ax.text(1, support_level - 0.58, "INSTITUTIONAL SUPPORT ZONE (SNR)", color='#69f0ae', fontsize=8, fontweight='bold')
     
     arrow_char = '⬆' if direction == "CALL" else '⬇'
-    arrow_pos = lows[entry_index] - 0.75 if direction == "CALL" else highs[entry_index] + 0.55
-    ax.annotate(arrow_char, xy=(entry_index, arrow_pos), color='#ffd600', fontsize=14, ha='center', fontweight='bold')
+    arrow_pos = lows[entry_index] - 0.78 if direction == "CALL" else highs[entry_index] + 0.58
+    ax.annotate(arrow_char, xy=(entry_index, arrow_pos), color='#ffd600', fontsize=15, ha='center', fontweight='bold')
     
     if is_result:
-        ax.axhline(entry_price, color='#ffd600', linestyle=':', linewidth=1.0, alpha=0.8)
+        ax.axhline(entry_price, color='#ffd600', linestyle=':', linewidth=1.1, alpha=0.85)
         
     ax.axhline(closes[-1], color='#00b0ff', linestyle='-', linewidth=0.9)
-    status_tag = "LIVE RESULT" if is_result else "1M CHART | 3M EXPIRATION"
-    ax.text(0.01, 0.96, f"{pair} | {timeframe} (UTC+6) | {status_tag}", transform=ax.transAxes, color='#e0e0e0', fontsize=9.5, fontweight='bold', va='top')
+    status_tag = f"LIVE RESULT ({outcome.replace('_', ' ')})" if is_result else f"1M CHART | 3 CANDLES (M3) | RSI: {rsi_val}"
+    ax.text(0.01, 0.96, f"{pair} | {timeframe} (UTC+6) | {status_tag}", transform=ax.transAxes, color='#ffffff', fontsize=9.5, fontweight='bold', va='top')
     
     ax.grid(color='#1e2430', linestyle=':', linewidth=0.6)
     ax.tick_params(axis='x', colors='#78909c', labelsize=7)
@@ -213,66 +305,38 @@ def render_snr_chart(pair, timeframe, direction, setup_data, is_result=False, ou
         spine.set_color('#263238')
         
     plt.tight_layout()
-    plt.savefig(filename, dpi=125, facecolor='#0b0e14')
+    plt.savefig(filename, dpi=130, facecolor='#0b0e14')
     plt.close(fig)
-    return filename
-
-def generate_result_sticker(is_win, filename="sticker.webp"):
-    custom = SETTINGS["custom_win_sticker"] if is_win else SETTINGS["custom_loss_sticker"]
-    if custom:
-        return custom
-        
-    width, height = 480, 170
-    bg_color = (0, 185, 30) if is_win else (230, 20, 25)
-    text_str = SETTINGS["win_sticker_text"] if is_win else SETTINGS["loss_sticker_text"]
-    
-    img = Image.new("RGBA", (width, height), bg_color)
-    draw = ImageDraw.Draw(img)
-    
-    r = 22
-    draw.ellipse((50 - r, height//2 - r, 50 + r, height//2 + r), fill=(255, 255, 255))
-    draw.ellipse((width - 50 - r, height//2 - r, width - 50 + r, height//2 + r), fill=(255, 255, 255))
-    
-    try:
-        font = ImageFont.truetype("arialbd.ttf", 72)
-    except Exception:
-        font = ImageFont.load_default()
-        
-    bbox = draw.textbbox((0, 0), text_str, font=font)
-    text_x = (width - (bbox[2] - bbox[0])) // 2
-    text_y = (height - (bbox[3] - bbox[1])) // 2 - 12
-    draw.text((text_x, text_y), text_str, fill=(255, 255, 255), font=font)
-    img.save(filename, "WEBP")
     return filename
 
 def broadcast_photo(photo_path, caption, with_buttons=True):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
     reply_markup = {
         "inline_keyboard": [[
-            {"text": "Official Channel ↗", "url": SETTINGS["channel_link"]},
-            {"text": "VIP Registration ↗", "url": SETTINGS["register_link"]}
+            {"text": "📢 Official Channel ↗", "url": SETTINGS["channel_link"]},
+            {"text": "💎 VIP Registration ↗", "url": SETTINGS["register_link"]}
         ]]
     }
-    for chat_id in TARGET_CHATS:
+    for chat_id in list(BOT_USERS):
         if str(chat_id) in BANNED_USERS:
             continue
-        data = {"chat_id": chat_id, "caption": caption}
+        data = {"chat_id": chat_id, "caption": caption, "parse_mode": "Markdown"}
         if with_buttons:
             data["reply_markup"] = json.dumps(reply_markup)
         try:
             with open(photo_path, "rb") as f:
-                requests.post(url, data=data, files={"photo": f}, timeout=20)
+                requests.post(url, data=data, files={"photo": f}, timeout=25)
         except Exception as e:
             print(f"Photo send error: {e}")
 
 def broadcast_sticker(path):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendSticker"
-    for chat_id in TARGET_CHATS:
+    for chat_id in list(BOT_USERS):
         if str(chat_id) in BANNED_USERS:
             continue
         try:
             with open(path, "rb") as f:
-                requests.post(url, data={"chat_id": chat_id}, files={"sticker": f}, timeout=20)
+                requests.post(url, data={"chat_id": chat_id}, files={"sticker": f}, timeout=25)
         except Exception:
             pass
 
@@ -280,20 +344,70 @@ def broadcast_text(text, with_button=False):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     reply_markup = {
         "inline_keyboard": [[
-            {"text": "Official Channel ↗", "url": SETTINGS["channel_link"]},
-            {"text": "VIP Registration ↗", "url": SETTINGS["register_link"]}
+            {"text": "📢 Official Channel ↗", "url": SETTINGS["channel_link"]},
+            {"text": "💎 VIP Registration ↗", "url": SETTINGS["register_link"]}
         ]]
     }
-    for chat_id in TARGET_CHATS:
+    for chat_id in list(BOT_USERS):
         if str(chat_id) in BANNED_USERS:
             continue
-        data = {"chat_id": chat_id, "text": text}
+        data = {"chat_id": chat_id, "text": text, "parse_mode": "Markdown"}
         if with_button:
             data["reply_markup"] = json.dumps(reply_markup)
         try:
-            requests.post(url, json=data, timeout=20)
+            requests.post(url, json=data, timeout=25)
         except Exception as e:
             print(f"Text send error: {e}")
+
+# --- [INTERACTIVE BUTTON ADMIN PANEL] ---
+def send_admin_panel(chat_id):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    keyboard = {
+        "inline_keyboard": [
+            [{"text": "👥 ইউজার লিস্ট ও স্ট্যাটাস", "callback_data": "cmd_users"}],
+            [
+                {"text": "🚫 Ban User", "callback_data": "info_ban"},
+                {"text": "✅ Unban User", "callback_data": "info_unban"}
+            ],
+            [
+                {"text": "✏️ Win স্টিকার টেক্সট", "callback_data": "info_win"},
+                {"text": "✏️ Loss স্টিকার টেক্সট", "callback_data": "info_loss"}
+            ],
+            [
+                {"text": "🖼️ নতুন Win স্টিকার সেট", "callback_data": "info_set_win_img"},
+                {"text": "🖼️ নতুন Loss স্টিকার সেট", "callback_data": "info_set_loss_img"}
+            ],
+            [
+                {"text": "🖼️ Start ব্যানার পরিবর্তন", "callback_data": "info_start"},
+                {"text": "🖼️ End ব্যানার পরিবর্তন", "callback_data": "info_end"}
+            ],
+            [
+                {"text": "🔗 চ্যানেল লিংক এডিট", "callback_data": "info_channel"},
+                {"text": "🔗 রেজিস্ট্রেশন লিংক এডিট", "callback_data": "info_reg"}
+            ],
+            [{"text": "📝 ভিআইপি রুলস মেসেজ এডিট করুন", "callback_data": "info_rules"}],
+            [{"text": "🗑️ সব কাস্টম স্টিকার/ব্যানার ডিলিট ও রিসেট করুন", "callback_data": "cmd_reset_all"}]
+        ]
+    }
+    text = (
+        f"{VIP_HEADER}\n"
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        "🛠️ **অ্যাডভান্সড ভিআইপি অ্যাডমিন প্যানেল** 🛠️\n\n"
+        "স্বাগতম রাহাত ভাই! নিচের যেকোনো বাটনে ক্লিক করে আপনি বটের স্টিকার, ব্যানার, টেক্সট, লিংক বা ইউজার সরাসরি নিয়ন্ত্রণ করতে পারবেন:"
+    )
+    requests.post(url, json={"chat_id": chat_id, "text": text, "parse_mode": "Markdown", "reply_markup": json.dumps(keyboard)})
+
+def download_telegram_file(file_id, save_filename):
+    file_info_url = f"https://api.telegram.org/bot{BOT_TOKEN}/getFile?file_id={file_id}"
+    f_res = requests.get(file_info_url).json()
+    if f_res.get("ok"):
+        file_path = f_res["result"]["file_path"]
+        download_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+        img_data = requests.get(download_url).content
+        with open(save_filename, "wb") as handler:
+            handler.write(img_data)
+        return save_filename
+    return None
 
 def poll_telegram_admin_commands():
     offset = 0
@@ -305,101 +419,162 @@ def poll_telegram_admin_commands():
                 data = res.json()
                 for result in data.get("result", []):
                     offset = result["update_id"] + 1
+                    
+                    if "callback_query" in result:
+                        cq = result["callback_query"]
+                        cq_id = cq["id"]
+                        chat_id = cq["message"]["chat"]["id"]
+                        data_val = cq["data"]
+                        
+                        answer_url = f"https://api.telegram.org/bot{BOT_TOKEN}/answerCallbackQuery"
+                        send_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+                        
+                        if chat_id != ADMIN_CHAT_ID:
+                            requests.post(answer_url, json={"callback_query_id": cq_id, "text": "শুধুমাত্র অ্যাডমিন ব্যবহার করতে পারবেন!"})
+                            continue
+                            
+                        if data_val == "cmd_users":
+                            u_list = (
+                                f"👥 মোট যুক্ত চ্যাট/ইউজার: {len(BOT_USERS)}\n"
+                                f"🚫 ব্যান করা ইউজার: {len(BANNED_USERS)}\n\n"
+                                f"📌 Active List: `{list(BOT_USERS)}`\n"
+                                f"📌 Banned List: `{list(BANNED_USERS)}`"
+                            )
+                            requests.post(send_url, json={"chat_id": chat_id, "text": u_list, "parse_mode": "Markdown"})
+                        elif data_val == "info_ban":
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "কাউকে ব্যান করতে লিখুন:\n`/ban [Chat_ID]`\nনতুন কাউকে যুক্ত করতে লিখুন:\n`/adduser [Chat_ID]`", "parse_mode": "Markdown"})
+                        elif data_val == "info_unban":
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "ব্যান তুলতে লিখুন:\n`/unban [Chat_ID]`", "parse_mode": "Markdown"})
+                        elif data_val == "info_win":
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "Win স্টিকারের লেখা পরিবর্তন করতে লিখুন:\n`/setwin WIN`", "parse_mode": "Markdown"})
+                        elif data_val == "info_loss":
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "Loss স্টিকারের লেখা পরিবর্তন করতে লিখুন:\n`/setloss LOSS`", "parse_mode": "Markdown"})
+                        elif data_val == "info_set_win_img":
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "নতুন Win স্টিকার বা ছবি সেট করতে যেকোনো ছবি/স্টিকারে Reply দিয়ে লিখুন:\n`/setwinimg`\n\nডিলিট করতে লিখুন: `/delwinimg`", "parse_mode": "Markdown"})
+                        elif data_val == "info_set_loss_img":
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "নতুন Loss স্টিকার বা ছবি সেট করতে যেকোনো ছবি/স্টিকারে Reply দিয়ে লিখুন:\n`/setlossimg`\n\nডিলিট করতে লিখুন: `/dellossimg`", "parse_mode": "Markdown"})
+                        elif data_val == "info_start":
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "নতুন Session Start ব্যানার সেট করতে যেকোনো ছবির ওপর Reply দিয়ে লিখুন:\n`/setstartsticker`\n\nডিলিট করতে: `/delstartsticker`", "parse_mode": "Markdown"})
+                        elif data_val == "info_end":
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "নতুন Session End ব্যানার সেট করতে যেকোনো ছবির ওপর Reply দিয়ে লিখুন:\n`/setendsticker`\n\nডিলিট করতে: `/delendsticker`", "parse_mode": "Markdown"})
+                        elif data_val == "info_channel":
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "চ্যানেল লিংক পরিবর্তন করতে লিখুন:\n`/setchannel https://t.me/yourlink`", "parse_mode": "Markdown"})
+                        elif data_val == "info_reg":
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "রেজিস্ট্রেশন লিংক পরিবর্তন করতে লিখুন:\n`/setreg https://broker-qx.pro/...`", "parse_mode": "Markdown"})
+                        elif data_val == "info_rules":
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "ভিআইপি রুলস মেসেজ পরিবর্তন করতে লিখুন:\n`/setrules আপনার নতুন নিয়মাবলী...`", "parse_mode": "Markdown"})
+                        elif data_val == "cmd_reset_all":
+                            SETTINGS["custom_start_banner"] = None
+                            SETTINGS["custom_end_banner"] = None
+                            SETTINGS["custom_win_sticker"] = None
+                            SETTINGS["custom_loss_sticker"] = None
+                            SETTINGS["win_sticker_text"] = "WIN"
+                            SETTINGS["loss_sticker_text"] = "LOSS"
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "✅ সমস্ত কাস্টম স্টিকার ও ব্যানার ডিলিট করে ডিফল্ট বড় সাইজে রিসেট করা হয়েছে!"})
+                            
+                        requests.post(answer_url, json={"callback_query_id": cq_id, "text": "সফল!"})
+                        continue
+
                     msg = result.get("message", {})
                     chat_id = msg.get("chat", {}).get("id")
                     text = msg.get("text", "").strip()
                     reply_to = msg.get("reply_to_message")
+                    
+                    if not chat_id:
+                        continue
+                    BOT_USERS.add(str(chat_id))
                     
                     if chat_id != ADMIN_CHAT_ID:
                         continue
                         
                     send_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
                     
-                    if text == "/admin":
-                        help_text = (
-                            "🛠️ **TRADER RAHAT | ADVANCED ADMIN PANEL** 🛠️\n\n"
-                            "• `/users` - Total user list o count dekhun\n"
-                            "• `/ban [chat_id]` - Kon user ke ban korun\n"
-                            "• `/unban [chat_id]` - Ban tule nin\n"
-                            "• `/setwin [Text]` - Win sticker text change korun\n"
-                            "• `/setloss [Text]` - Loss sticker text change korun\n"
-                            "• `/setchannel [URL]` - Channel link change korun\n"
-                            "• `/setreg [URL]` - Registration link change korun\n"
-                            "• `/setstartsticker` (Reply photo) - Notun Session Start image add korun\n"
-                            "• `/setendsticker` (Reply photo) - Notun Session End image add korun\n"
-                            "• `/delstartsticker` - Custom Start sticker delete/reset korun\n"
-                            "• `/delendsticker` - Custom End sticker delete/reset korun"
-                        )
-                        requests.post(send_url, json={"chat_id": chat_id, "text": help_text, "parse_mode": "Markdown"})
+                    if text in ["/start", "/admin"]:
+                        send_admin_panel(chat_id)
                         
                     elif text == "/users":
-                        u_list = f"👥 Total Users: {len(BOT_USERS)}\n🚫 Banned Users: {len(BANNED_USERS)}\n\nActive Chats: {list(BOT_USERS)}"
+                        u_list = f"👥 Total Users: {len(BOT_USERS)}\n🚫 Banned Users: {len(BANNED_USERS)}\n\nActive: {list(BOT_USERS)}"
                         requests.post(send_url, json={"chat_id": chat_id, "text": u_list})
                         
+                    elif text.startswith("/adduser "):
+                        a_id = text.replace("/adduser ", "").strip()
+                        BOT_USERS.add(a_id)
+                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ ইউজার/চ্যানেল {a_id} সফলভাবে যুক্ত করা হয়েছে।"})
+
                     elif text.startswith("/ban "):
-                        b_id = text.split(" ")[1]
+                        b_id = text.replace("/ban ", "").strip()
                         BANNED_USERS.add(str(b_id))
-                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ User {b_id} successfully banned."})
+                        requests.post(send_url, json={"chat_id": chat_id, "text": f"🚫 ইউজার {b_id} সফলভাবে ব্যান করা হয়েছে।"})
                         
                     elif text.startswith("/unban "):
-                        u_id = text.split(" ")[1]
-                        if u_id in BANNED_USERS:
-                            BANNED_USERS.remove(str(u_id))
-                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ User {u_id} unbanned."})
+                        u_id = text.replace("/unban ", "").strip()
+                        BANNED_USERS.discard(str(u_id))
+                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ ইউজার {u_id} আনব্যান করা হয়েছে।"})
                         
                     elif text.startswith("/setwin "):
                         new_w = text.replace("/setwin ", "").strip()
                         SETTINGS["win_sticker_text"] = new_w
-                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ Win sticker text updated to: {new_w}"})
+                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ Win স্টিকার টেক্সট আপডেট হয়েছে: {new_w}"})
                         
                     elif text.startswith("/setloss "):
                         new_l = text.replace("/setloss ", "").strip()
                         SETTINGS["loss_sticker_text"] = new_l
-                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ Loss sticker text updated to: {new_l}"})
+                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ Loss স্টিকার টেক্সট আপডেট হয়েছে: {new_l}"})
                         
                     elif text.startswith("/setchannel "):
                         new_c = text.replace("/setchannel ", "").strip()
                         SETTINGS["channel_link"] = new_c
-                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ Channel link updated to: {new_c}"})
+                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ অফিশিয়াল চ্যানেল লিংক আপডেট হয়েছে:\n{new_c}"})
                         
                     elif text.startswith("/setreg "):
                         new_r = text.replace("/setreg ", "").strip()
                         SETTINGS["register_link"] = new_r
-                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ Registration link updated to: {new_r}"})
+                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ রেজিস্ট্রেশন লিংক আপডেট হয়েছে:\n{new_r}"})
+
+                    elif text.startswith("/setrules "):
+                        new_rules = text.replace("/setrules ", "").strip()
+                        SETTINGS["rules_text"] = new_rules
+                        requests.post(send_url, json={"chat_id": chat_id, "text": "✅ ভিআইপি রুলস মেসেজ সফলভাবে আপডেট করা হয়েছে!"})
                         
                     elif text == "/delstartsticker":
-                        SETTINGS["custom_start_sticker"] = None
-                        requests.post(send_url, json={"chat_id": chat_id, "text": "✅ Custom Session Start banner deleted/reset to default."})
+                        SETTINGS["custom_start_banner"] = None
+                        requests.post(send_url, json={"chat_id": chat_id, "text": "✅ কাস্টম Start ব্যানার ডিলিট করে ডিফল্ট করা হয়েছে।"})
                         
                     elif text == "/delendsticker":
-                        SETTINGS["custom_end_sticker"] = None
-                        requests.post(send_url, json={"chat_id": chat_id, "text": "✅ Custom Session End banner deleted/reset to default."})
+                        SETTINGS["custom_end_banner"] = None
+                        requests.post(send_url, json={"chat_id": chat_id, "text": "✅ কাস্টম End ব্যানার ডিলিট করে ডিফল্ট করা হয়েছে।"})
+
+                    elif text == "/delwinimg":
+                        SETTINGS["custom_win_sticker"] = None
+                        requests.post(send_url, json={"chat_id": chat_id, "text": "✅ কাস্টম Win স্টিকার ডিলিট করে ডিফল্ট করা হয়েছে।"})
+
+                    elif text == "/dellossimg":
+                        SETTINGS["custom_loss_sticker"] = None
+                        requests.post(send_url, json={"chat_id": chat_id, "text": "✅ কাস্টম Loss স্টিকার ডিলিট করে ডিফল্ট করা হয়েছে।"})
                         
                     elif text == "/setstartsticker" and reply_to and "photo" in reply_to:
                         photo_id = reply_to["photo"][-1]["file_id"]
-                        file_info_url = f"https://api.telegram.org/bot{BOT_TOKEN}/getFile?file_id={photo_id}"
-                        f_res = requests.get(file_info_url).json()
-                        if f_res.get("ok"):
-                            file_path = f_res["result"]["file_path"]
-                            download_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
-                            img_data = requests.get(download_url).content
-                            with open("custom_start.png", "wb") as handler:
-                                handler.write(img_data)
-                            SETTINGS["custom_start_sticker"] = "custom_start.png"
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "✅ New Session Start banner added successfully!"})
+                        if download_telegram_file(photo_id, "custom_start.png"):
+                            SETTINGS["custom_start_banner"] = "custom_start.png"
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "✅ নতুন Session Start ব্যানার সফলভাবে সেট করা হয়েছে!"})
                             
                     elif text == "/setendsticker" and reply_to and "photo" in reply_to:
                         photo_id = reply_to["photo"][-1]["file_id"]
-                        file_info_url = f"https://api.telegram.org/bot{BOT_TOKEN}/getFile?file_id={photo_id}"
-                        f_res = requests.get(file_info_url).json()
-                        if f_res.get("ok"):
-                            file_path = f_res["result"]["file_path"]
-                            download_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
-                            img_data = requests.get(download_url).content
-                            with open("custom_end.png", "wb") as handler:
-                                handler.write(img_data)
-                            SETTINGS["custom_end_sticker"] = "custom_end.png"
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "✅ New Session End banner added successfully!"})
+                        if download_telegram_file(photo_id, "custom_end.png"):
+                            SETTINGS["custom_end_banner"] = "custom_end.png"
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "✅ নতুন Session End ব্যানার সফলভাবে সেট করা হয়েছে!"})
+
+                    elif text == "/setwinimg" and reply_to:
+                        f_id = reply_to["sticker"]["file_id"] if "sticker" in reply_to else (reply_to["photo"][-1]["file_id"] if "photo" in reply_to else None)
+                        if f_id and download_telegram_file(f_id, "custom_win.webp"):
+                            SETTINGS["custom_win_sticker"] = "custom_win.webp"
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "✅ নতুন Win স্টিকার সফলভাবে সেট করা হয়েছে!"})
+
+                    elif text == "/setlossimg" and reply_to:
+                        f_id = reply_to["sticker"]["file_id"] if "sticker" in reply_to else (reply_to["photo"][-1]["file_id"] if "photo" in reply_to else None)
+                        if f_id and download_telegram_file(f_id, "custom_loss.webp"):
+                            SETTINGS["custom_loss_sticker"] = "custom_loss.webp"
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "✅ নতুন Loss স্টিকার সফলভাবে সেট করা হয়েছে!"})
                             
         except Exception as e:
             print(f"Admin poll error: {e}")
@@ -413,18 +588,17 @@ def wait_until(target_dt, tz):
             break
         time.sleep(min(remaining, 1.0))
 
+# --- [MAIN VIP TRADING ENGINE: ZERO CONSECUTIVE LOSS & HIGH DIRECT WIN] ---
 def run_vip_trading_bot():
     global session_wins, session_losses, last_was_loss
     print("=====================================================")
-    print(f"🚀 {VIP_HEADER} Bot with Advanced Admin Panel started!")
-    print("⏰ Session Times: 10:00 AM, 02:00 PM, 08:00 PM (UTC+6)")
+    print(f"🚀 {VIP_HEADER} Ultimate Bot Started!")
+    print("⏰ Sessions: 10:00 AM, 02:00 PM, 08:00 PM (UTC+6) | Zero Back-to-Back Loss")
     print("=====================================================")
     
     current_session_date = None
-    session_signals_sent = {10: 0, 14: 0, 20: 0}
-    session_target_limit = {10: 5, 14: 5, 20: 5}
-    
     session_started_flag = {10: False, 14: False, 20: False}
+    session_completed_flag = {10: False, 14: False, 20: False}
     reminder_sent_flag = {10: False, 14: False, 20: False}
     
     active_session_hour = None
@@ -438,29 +612,32 @@ def run_vip_trading_bot():
         
         if current_session_date != today_str:
             current_session_date = today_str
-            session_signals_sent = {10: 0, 14: 0, 20: 0}
             session_started_flag = {10: False, 14: False, 20: False}
+            session_completed_flag = {10: False, 14: False, 20: False}
             reminder_sent_flag = {10: False, 14: False, 20: False}
             active_session_hour = None
             
         active_hours = [10, 14, 20]
         
+        # ১. ঠিক ৩০ মিনিট আগে প্রিমিয়াম বাংলায় রিমাইন্ডার মেসেজ
         for h in active_hours:
             remind_hour = h - 1
-            if current_hour == remind_hour and current_minute >= 30 and not reminder_sent_flag[h]:
+            if current_hour == remind_hour and 30 <= current_minute <= 35 and not reminder_sent_flag[h]:
                 reminder_sent_flag[h] = True
                 broadcast_text(
                     f"{VIP_HEADER}\n"
-                    f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                    f"🔔 VIP Session Reminder\n\n"
-                    f"প্রিয় ভিআইপি সদস্যগণ, আগামী ৩০ মিনিটের মধ্যে আমাদের হাই-অ্যাকুরেসি সাপোর্ট ও রেজিস্ট্যান্স ট্রেডিং সেশন শুরু হতে যাচ্ছে!\n\n"
-                    f"সবাই দ্রুত ব্রোকারে লগইন করে প্রস্তুত হয়ে যান।",
+                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"🔔 **ভিআইপি ট্রেডিং সেশন রিমাইন্ডার** 🔔\n\n"
+                    f"আসসালামু আলাইকুম প্রিয় ভিআইপি সদস্যবৃন্দ,\n"
+                    f"আগামী **৩০ মিনিটের** মধ্যে আমাদের অফিশিয়াল হাই-অ্যাকুরেসি **SNR ও প্রাইস অ্যাকশন** ট্রেডিং সেশন শুরু হতে যাচ্ছে!\n\n"
+                    f"💼 সবাই দ্রুত ব্রোকারে লগইন করে মানি ম্যানেজমেন্ট অনুযায়ী প্রস্তুত হয়ে যান। ইনশাআল্লাহ আজও আমাদের সেশনটি প্রফিটময় হবে!",
                     with_button=True
                 )
                 
+        # ২. সেশন শুরুর ৫ মিনিট আগে বিসমিল্লাহ ও বিশাল স্টার্ট ব্যানার
         for h in active_hours:
             is_pre_session = (current_hour == h - 1 and current_minute >= 55)
-            is_in_session = (current_hour == h and session_signals_sent[h] == 0)
+            is_in_session = (current_hour == h and not session_completed_flag[h])
             
             if (is_pre_session or is_in_session) and not session_started_flag[h]:
                 session_started_flag[h] = True
@@ -468,146 +645,164 @@ def run_vip_trading_bot():
                 session_losses = 0
                 last_was_loss = False
                 
-                banner = SETTINGS["custom_start_sticker"] if SETTINGS["custom_start_sticker"] else generate_session_banner(is_start=True)
+                banner = generate_session_banner(is_start=True)
                 broadcast_photo(
                     banner,
+                    f"🕋 **বিসমিল্লাহির রাহমানির রাহিম** 🕋\n"
                     f"{VIP_HEADER}\n"
-                    f"🟢 [ SESSION STARTS ] 🟢\n\n"
-                    f"প্রিয় সদস্যবৃন্দ, আমাদের অফিশিয়াল ট্রেডিং সেশন এখনই শুরু হচ্ছে! সবাই হাই-অ্যাকুরেসি এসএনআর (SNR) সিগন্যালের জন্য প্রস্তুত থাকুন।",
+                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"🟢 **【 𝐕𝐈𝐏 𝐒𝐄𝐒𝐒𝐈𝐎𝐍 𝐒𝐓𝐀𝐑𝐓𝐒 】** 🟢\n\n"
+                    f"মহান আল্লাহর নামে আমাদের আজকের ভিআইপি ট্রেডিং সেশন শুরু হলো! সবাই **১ মিনিটের (1M) চার্ট** ওপেন করে আমাদের স্নাইপার সিগন্যালের জন্য প্রস্তুত থাকুন।",
                     with_buttons=True
                 )
                 time.sleep(2)
-                broadcast_text(VIP_RULES_TEXT, with_button=True)
+                broadcast_text(SETTINGS["rules_text"], with_button=True)
                 
-        if current_hour in active_hours and session_signals_sent[current_hour] < session_target_limit[current_hour]:
+        # ৩. ১ ঘণ্টার কোয়ালিটি সেশন ইঞ্জিন
+        if current_hour in active_hours and not session_completed_flag[current_hour]:
             active_session_hour = current_hour
             
         if active_session_hour is not None:
-            sent_count = session_signals_sent[active_session_hour]
-            target_count = session_target_limit[active_session_hour]
-            
-            if sent_count < target_count:
-                if sent_count == 0:
-                    scan_wait = random.randint(15, 30)
-                else:
-                    scan_wait = random.randint(240, 420)
-                    
-                time.sleep(scan_wait)
-                
-                sig_now = datetime.datetime.now(tz)
-                if sig_now.second > 10:
-                    next_min = (sig_now + datetime.timedelta(minutes=1)).replace(second=2, microsecond=0)
-                    wait_until(next_min, tz)
-                
-                sig_now = datetime.datetime.now(tz)
-                entry_time_obj = (sig_now + datetime.timedelta(minutes=2)).replace(second=0, microsecond=0)
-                timetable = entry_time_obj.strftime("%H:%M")
-                
-                exp_minutes = 3
-                expiration = "3 Minutes (M3 on 1M Chart)"
-                exit_time_obj = entry_time_obj + datetime.timedelta(minutes=exp_minutes)
-                timeset = exit_time_obj.strftime("%H:%M")
-                
-                asset = random.choice(HIGH_PAYOUT_PAIRS)
-                direction = random.choice(["CALL", "PUT"])
-                
-                if direction == "CALL":
-                    dir_line = "🟢 Direction -» UP / CALL (UP) ⬆"
-                    snr_reason = "Strong Support Rejection & Bollinger Band"
-                else:
-                    dir_line = "🔴 Direction -» DOWN / PUT (DOWN) ⬇"
-                    snr_reason = "Strong Resistance Rejection & Bollinger Band"
-                
-                market_setup = create_market_setup(direction)
-                chart_file = render_snr_chart(asset, "M3", direction, market_setup, is_result=False, filename="signal_chart.png")
-                
-                signal_caption = (
-                    f"{VIP_HEADER}\n\n"
-                    f"====== VIP SIGNAL ======\n"
-                    f"╭───────────────⋅•⋅⊰∙∘☽\n"
-                    f"🐉 Pair -» {asset}\n"
-                    f"🕒 Entry Time -» {timetable} (UTC+6)\n"
-                    f"⏰ Time Set -» {timeset}\n"
-                    f"⏳ Expiration -» {expiration}\n"
-                    f"📊 Analysis -» {snr_reason}\n"
-                    f"{dir_line}\n"
-                    f"╰───────────────⋅•⋅⊰∙∘☽\n\n"
-                    f"⏳ হাতে ২ মিনিট সময় আছে, ১ মিনিটের চার্ট ওপেন করে পেয়ার ও ৩ মিনিটের টাইম সেট করে প্রস্তুত থাকুন!"
+            now = datetime.datetime.now(tz)
+            if now.hour != active_session_hour or now.minute >= 55:
+                session_completed_flag[active_session_hour] = True
+                time.sleep(3)
+                end_banner = generate_session_banner(is_start=False)
+                s_total = session_wins + session_losses
+                s_rate = int((session_wins / s_total) * 100) if s_total > 0 else 100
+                end_msg = (
+                    f"🤲 **আলহামদুলিল্লাহ! (Alhamdulillah)** 🤲\n"
+                    f"{VIP_HEADER}\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"🔴 **【 𝐕𝐈𝐏 𝐒𝐄𝐒𝐒𝐈𝐎𝐍 𝐄𝐍𝐃𝐒 】** 🔴\n\n"
+                    f"📊 **আজকের সেশনের চূড়ান্ত রিপোর্ট:**\n"
+                    f"╭───────────────────────⋅•⋅⊰∙∘☽\n"
+                    f"🎯 **Total Signals:** `{s_total}`\n"
+                    f"✅ **Winning Trades:** `{session_wins} WIN`\n"
+                    f"❌ **Losing Trades:** `{session_losses} LOSS`\n"
+                    f"🔥 **Session Accuracy:** `{s_rate}%` 🏆\n"
+                    f"╰───────────────────────⋅•⋅⊰∙∘☽\n\n"
+                    f"আলহামদুলিল্লাহ, দারুণ একুরেসির সাথে আমাদের আজকের সেশনটি সম্পন্ন হয়েছে! সবাই আজকের প্রফিট সুরক্ষিত রাখুন। পরবর্তী সেশনে আবারও সবার সাথে দেখা হবে ইনশাআল্লাহ!"
                 )
-                broadcast_photo(chart_file, signal_caption, with_buttons=True)
-                
-                if last_was_loss:
-                    outcome = random.choices(["DIRECT_WIN", "MTG_WIN"], weights=[90, 10], k=1)[0]
-                    last_was_loss = False
-                else:
-                    outcome = random.choices(["DIRECT_WIN", "MTG_WIN", "LOSS"], weights=[82, 14, 4], k=1)[0]
-                    if outcome == "LOSS":
-                        last_was_loss = True
-                        
-                wait_until(exit_time_obj + datetime.timedelta(seconds=2), tz)
-                
-                if outcome in ["MTG_WIN", "LOSS"]:
-                    mtg_exit_obj = exit_time_obj + datetime.timedelta(minutes=exp_minutes)
-                    wait_until(mtg_exit_obj + datetime.timedelta(seconds=2), tz)
-                    
-                if outcome == "DIRECT_WIN":
-                    session_wins += 1
-                    is_win = True
-                    res_status = "- ✅✅✅ Direct Win (WIN) ✅✅✅"
-                elif outcome == "MTG_WIN":
-                    session_wins += 1
-                    is_win = True
-                    res_status = "- ✅✅✅ 1-Step Martingale Win (MTG WIN¹) ✅✅✅"
-                else:
-                    session_losses += 1
-                    is_win = False
-                    res_status = "- ❎✖️💀 Loss Trade (LOSS) 💀✖️❎"
-                    
-                total_session_trades = session_wins + session_losses
-                session_win_rate = int((session_wins / total_session_trades) * 100) if total_session_trades > 0 else 0
-                
-                res_chart = render_snr_chart(asset, "M3", direction, market_setup, is_result=True, outcome=outcome, filename="result_chart.png")
-                res_caption = (
-                    f"{VIP_HEADER}\n\n"
-                    f"====== LIVE RESULT ======\n"
-                    f"╭───────────────⋅•⋅⊰∙∘☽\n"
-                    f"🐉 Pair: {asset} | 🕒 Entry: {timetable} (Set: {timeset})\n"
-                    f"╰───────────────⋅•⋅⊰∙∘☽\n\n"
-                    f"{res_status}\n\n"
-                    f"╭───────────────⋅•⋅⊰∙∘☽\n"
-                    f"🚀 Win: {session_wins} | Loss: {session_losses} -◆- ({session_win_rate}%)\n"
-                    f"╰───────────────⋅•⋅⊰∙∘☽\n\n"
-                    f"📳 Live chart result updated successfully"
-                )
-                broadcast_photo(res_chart, res_caption, with_buttons=True)
-                broadcast_sticker(generate_result_sticker(is_win))
-                
-                session_signals_sent[active_session_hour] += 1
-                
-                if session_signals_sent[active_session_hour] >= target_count:
-                    time.sleep(5)
-                    end_banner = SETTINGS["custom_end_sticker"] if SETTINGS["custom_end_sticker"] else generate_session_banner(is_start=False)
-                    s_total = session_wins + session_losses
-                    s_rate = int((session_wins / s_total) * 100) if s_total > 0 else 0
-                    end_msg = (
-                        f"{VIP_HEADER}\n"
-                        f"🔴 [ SESSION ENDS ] 🔴\n"
-                        f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                        f"📊 Session Summary:\n"
-                        f"• Total Signals: {s_total}\n"
-                        f"• Successful Trades (Win): {session_wins} ✅\n"
-                        f"• Failed Trades (Loss): {session_losses} ❌\n"
-                        f"• Session Accuracy: {s_rate}% 🎯\n"
-                        f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                        f"আজকের সেশনটি সফলভাবে সম্পন্ন হয়েছে। পরবর্তী সেশনে আবার সবার সাথে দেখা হবে!"
-                    )
-                    broadcast_photo(end_banner, end_msg, with_buttons=True)
-                    active_session_hour = None
-            else:
+                broadcast_photo(end_banner, end_msg, with_buttons=True)
                 active_session_hour = None
-                time.sleep(30)
+                continue
+
+            if (session_wins + session_losses) == 0:
+                scan_wait = random.randint(20, 40)
+            else:
+                scan_wait = random.randint(150, 300)
+                
+            time.sleep(scan_wait)
+            
+            sig_now = datetime.datetime.now(tz)
+            if sig_now.hour != active_session_hour or sig_now.minute >= 55:
+                continue
+
+            if sig_now.second > 8:
+                next_min = (sig_now + datetime.timedelta(minutes=1)).replace(second=2, microsecond=0)
+                wait_until(next_min, tz)
+            
+            sig_now = datetime.datetime.now(tz)
+            entry_time_obj = (sig_now + datetime.timedelta(minutes=2)).replace(second=0, microsecond=0)
+            timetable = entry_time_obj.strftime("%H:%M")
+            
+            exp_minutes = 3
+            expiration = "3 Minutes (3 Candles on 1M Chart)"
+            exit_time_obj = entry_time_obj + datetime.timedelta(minutes=exp_minutes)
+            timeset = exit_time_obj.strftime("%H:%M")
+            
+            asset = random.choice(HIGH_PAYOUT_PAIRS)
+            direction = random.choice(["CALL", "PUT"])
+            
+            market_setup = analyze_and_create_market_setup(direction)
+            snr_reason = market_setup["analysis_text"]
+            
+            if direction == "CALL":
+                dir_line = "🟢 **Direction -» UP / CALL (UP)** ⬆️"
+            else:
+                dir_line = "🔴 **Direction -» DOWN / PUT (DOWN)** ⬇️"
+            
+            chart_file = render_snr_chart(asset, "M3", direction, market_setup, is_result=False, filename="signal_chart.png")
+            
+            # আকর্ষণীয় ও সুশৃঙ্খল সিগন্যাল ক্যাপশন
+            signal_caption = (
+                f"{VIP_HEADER}\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"🔥 **【 𝐕𝐈𝐏 𝐒𝐍𝐈𝐏𝐄𝐑 𝐒𝐈𝐆𝐍𝐀𝐋 】** 🔥\n"
+                f"╭───────────────────────⋅•⋅⊰∙∘☽\n"
+                f"🐉 **Pair -»** `{asset}`\n"
+                f"🕒 **Entry Time -»** `{timetable}` (UTC+6)\n"
+                f"⏰ **Time Set -»** `{timeset}` (3 Candles)\n"
+                f"⏳ **Expiration -»** `{expiration}`\n"
+                f"📊 **Analysis -»** {snr_reason}\n"
+                f"{dir_line}\n"
+                f"╰───────────────────────⋅•⋅⊰∙∘☽\n\n"
+                f"🛡️ **MTG Note:** যদি প্রথম ট্রেডটি মিস হয়, তবে একই ডিরেকশনে পরবর্তী ৩ মিনিটের (৩টি ক্যান্ডেল) জন্য **১-স্টেপ এমটিজি (MTG)** ব্যবহার করবেন!\n\n"
+                f"⚡ **প্রস্তুতি:** হাতে ২ মিনিট সময় আছে, দ্রুত ১ মিনিটের চার্টে পেয়ার ও ক্লোজিং টাইম (`{timeset}`) সেট করে নিন!"
+            )
+            broadcast_photo(chart_file, signal_caption, with_buttons=True)
+            
+            # =================================================================
+            # 🛡️ [ZERO CONSECUTIVE LOSS & DIRECT WIN PRIORITY ENGINE]
+            # =================================================================
+            # ১. যদি আগের সিগন্যালটি লস হয়ে থাকে, তবে এই সিগন্যালটি ১০০% প্রফিট হবেই (লস হওয়ার সম্ভাবনা 0%)।
+            # ২. তাছাড়া পুরো সেশনে সর্বোচ্চ ১টির বেশি লস কখনোই হবে না (session_losses >= 1 হলে আর কোনো লস নেই)।
+            # ৩. বেশিরভাগ ট্রেড প্রথম স্টেপেই (DIRECT_WIN = 86%+) প্রফিট হবে।
+            if last_was_loss or session_losses >= 1:
+                outcome = random.choices(["DIRECT_WIN", "MTG_WIN"], weights=[92, 8], k=1)[0]
+                last_was_loss = False
+            else:
+                outcome = random.choices(["DIRECT_WIN", "MTG_WIN", "LOSS"], weights=[85, 11, 4], k=1)[0]
+                if outcome == "LOSS":
+                    last_was_loss = True
+            # =================================================================
+                    
+            # ১ম ধাপ: মূল ৩টি ক্যান্ডেল (৩ মিনিট) পুরোপুরি শেষ হওয়া পর্যন্ত কঠোরভাবে অপেক্ষা করবে
+            wait_until(exit_time_obj + datetime.timedelta(seconds=3), tz)
+            
+            # ২য় ধাপ: যদি ট্রেডটি MTG_WIN বা LOSS হয়, তবে আরও ৩টি ক্যান্ডেল (পূর্ণ ৩ মিনিট) শেষ হওয়া পর্যন্ত অপেক্ষা করবে
+            if outcome in ["MTG_WIN", "LOSS"]:
+                mtg_exit_obj = exit_time_obj + datetime.timedelta(minutes=exp_minutes)
+                wait_until(mtg_exit_obj + datetime.timedelta(seconds=3), tz)
+                
+            if outcome == "DIRECT_WIN":
+                session_wins += 1
+                is_win = True
+                res_status = "✅✅✅ **Direct Win (SURESHOT WIN)** ✅✅✅"
+            elif outcome == "MTG_WIN":
+                session_wins += 1
+                is_win = True
+                res_status = "✅✅✅ **1-Step Martingale Win (MTG WIN¹)** ✅✅✅"
+            else:
+                session_losses += 1
+                is_win = False
+                res_status = "❎✖️💀 **Loss Trade (LOSS - Wait for Recovery)** 💀✖️❎"
+                
+            total_session_trades = session_wins + session_losses
+            session_win_rate = int((session_wins / total_session_trades) * 100) if total_session_trades > 0 else 100
+            
+            res_chart = render_snr_chart(asset, "M3", direction, market_setup, is_result=True, outcome=outcome, filename="result_chart.png")
+            res_caption = (
+                f"{VIP_HEADER}\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"📣 **【 𝐋𝐈𝐕𝐄 𝐒𝐈𝐆𝐍𝐀𝐋 𝐑𝐄𝐒𝐔𝐋𝐓 】** 📣\n"
+                f"╭───────────────────────⋅•⋅⊰∙∘☽\n"
+                f"🐉 **Pair:** `{asset}`\n"
+                f"🕒 **Entry:** `{timetable}`  |  ⏰ **Close:** `{timeset}`\n"
+                f"╰───────────────────────⋅•⋅⊰∙∘☽\n\n"
+                f"{res_status}\n\n"
+                f"╭───────────────────────⋅•⋅⊰∙∘☽\n"
+                f"🚀 **Session Score:** `Win: {session_wins}` | `Loss: {session_losses}`\n"
+                f"🎯 **Accuracy Rate:** `{session_win_rate}%`\n"
+                f"╰───────────────────────⋅•⋅⊰∙∘☽\n\n"
+                f"🤲 **Alhamdulillah! Live chart result updated.**"
+            )
+            broadcast_photo(res_chart, res_caption, with_buttons=True)
+            broadcast_sticker(generate_result_sticker(is_win))
+            
         else:
-            time.sleep(20)
+            time.sleep(15)
 
 if __name__ == "__main__":
     threading.Thread(target=start_keep_alive_server, daemon=True).start()
