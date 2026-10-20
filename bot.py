@@ -17,18 +17,29 @@ from PIL import Image, ImageDraw, ImageFont
 # 🛠️ [ADMIN PANEL & CORE CONFIGURATION - TRADER RAHAT | TR VIP 999]
 # =====================================================================
 BOT_TOKEN = "8938988396:AAEUvJyoWUuzc8NB9Y2LyNPIrwD-LL6NM00"
+# প্রাইভেট চ্যানেলের নিউমেরিক আইডি থাকলে নিচে বসাতে পারেন, অথবা বটে চ্যানেলের একটি মেসেজ ফরওয়ার্ড করলেই অটো যুক্ত হয়ে যাবে!
 TARGET_CHATS = ["@trvip999", "8699074327"]
 ADMIN_CHAT_ID = 8699074327
 
 TIMEZONE = "Asia/Dhaka"  # UTC+6
 VIP_HEADER = "👑 𝐓𝐫𝐚𝐝𝐞𝐫 𝐑𝐚𝐡𝐚𝐭 | 𝐓𝐑 𝐕𝐈𝐏 𝟗𝟗𝟗 👑"
 
-# ডাইনামিক সেটিংস (অ্যাডমিন প্যানেল থেকে যেকোনো সময় পরিবর্তনযোগ্য)
+# কোটেক্সে ২৪ ঘণ্টা সবসময় সচল থাকা মূল কারেন্সি পেয়ারসমূহ
+REAL_MARKET_PAIRS = [
+    "EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "EUR/GBP", "USD/CAD", "EUR/JPY", "GBP/JPY"
+]
+
+OTC_MARKET_PAIRS = [
+    "EUR/USD (OTC)", "GBP/USD (OTC)", "USD/JPY (OTC)", "AUD/USD (OTC)",
+    "NZD/USD (OTC)", "USD/CAD (OTC)", "EUR/GBP (OTC)", "USD/BRL (OTC)", "USD/BDT (OTC)"
+]
+
 SETTINGS = {
     "channel_link": "https://t.me/traderrahat420",
     "register_link": "https://broker-qx.pro/sign-up/?lid=2187284",
     "win_sticker_text": "WIN",
     "loss_sticker_text": "LOSS",
+    "market_mode": "AUTO",  # অপশনসমূহ: "AUTO", "REAL_ONLY", "OTC_ONLY"
     "custom_start_banner": None,
     "custom_end_banner": None,
     "custom_win_sticker": None,
@@ -54,23 +65,36 @@ SETTINGS = {
 
 BOT_USERS = set(TARGET_CHATS)
 BANNED_USERS = set()
-
-HIGH_PAYOUT_PAIRS = [
-    "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "EURGBP", "USDCAD",
-    "EURUSD-OTC", "GBPUSD-OTC", "USDJPY-OTC", "AUDUSD-OTC", "EURGBP-OTC", "NZDUSD-OTC"
-]
 # =====================================================================
 
 session_wins = 0
 session_losses = 0
 last_was_loss = False
+force_instant_session = False  # যেকোনো মুহূর্তে পূর্ণ ১ ঘণ্টার সেশন চালুর ট্রিগার
+
+# --- [QUOTEX SMART PAIR SELECTOR (NO FAKE OTC/REAL MIXUP)] ---
+def get_active_quotex_pair(now_dt):
+    """
+    কোটেক্সের লাইভ মার্কেট কন্ডিশন অনুযায়ী সঠিক পেয়ার নির্বাচন করে।
+    শনি ও রবিবার (weekday 5, 6) রিয়েল মার্কেট বন্ধ থাকে, তাই ১০০% OTC দেয়।
+    """
+    mode = SETTINGS["market_mode"]
+    if mode == "REAL_ONLY":
+        return random.choice(REAL_MARKET_PAIRS)
+    elif mode == "OTC_ONLY":
+        return random.choice(OTC_MARKET_PAIRS)
+    else:
+        # AUTO Mode: শনি ও রবিবার (5, 6) ১০০% OTC মার্কেট
+        if now_dt.weekday() in [5, 6]:
+            return random.choice(OTC_MARKET_PAIRS)
+        # সোম থেকে শুক্রবার দুপুর ১২টা থেকে রাত ১১টা পর্যন্ত ফরেক্সের মেইন রিয়েল পেয়ারগুলো কোটেক্সে সচল থাকে
+        if 12 <= now_dt.hour <= 22:
+            return random.choice(REAL_MARKET_PAIRS)
+        else:
+            return random.choice(OTC_MARKET_PAIRS)
 
 # --- [LINUX & WINDOWS GUARANTEED BOLD FONT LOADER] ---
 def get_bold_font(size):
-    """
-    রেন্ডার (Linux) এবং Windows উভয় সার্ভারেই শতভাগ কাজ করবে এমন বোল্ড ফন্ট লোডার।
-    লেখা কখনোই আর ছোট হবে না।
-    """
     font_candidates = [
         fm.findfont(fm.FontProperties(family='DejaVu Sans', weight='bold')),
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
@@ -122,7 +146,7 @@ def generate_session_banner(is_start=True, filename="session_banner.png"):
     sub_text = "BISMILLAH | HIGH ACCURACY SNR SIGNALS" if is_start else "ALHAMDULILLAH | VIP SESSION COMPLETED"
     
     font_title = get_bold_font(36)
-    font_main = get_bold_font(94)  # বিশাল ও স্পষ্ট বোল্ড সাইজ
+    font_main = get_bold_font(94)
     font_sub = get_bold_font(25)
     
     tb1 = draw.textbbox((0, 0), title_text, font=font_title)
@@ -327,7 +351,7 @@ def broadcast_photo(photo_path, caption, with_buttons=True):
             with open(photo_path, "rb") as f:
                 requests.post(url, data=data, files={"photo": f}, timeout=25)
         except Exception as e:
-            print(f"Photo send error: {e}")
+            print(f"Photo send error ({chat_id}): {e}")
 
 def broadcast_sticker(path):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendSticker"
@@ -357,14 +381,20 @@ def broadcast_text(text, with_button=False):
         try:
             requests.post(url, json=data, timeout=25)
         except Exception as e:
-            print(f"Text send error: {e}")
+            print(f"Text send error ({chat_id}): {e}")
 
 # --- [INTERACTIVE BUTTON ADMIN PANEL] ---
 def send_admin_panel(chat_id):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     keyboard = {
         "inline_keyboard": [
-            [{"text": "👥 ইউজার লিস্ট ও স্ট্যাটাস", "callback_data": "cmd_users"}],
+            [{"text": "🚀 এখনই ১ ঘণ্টার লাইভ সেশন শুরু করুন", "callback_data": "cmd_start_now"}],
+            [
+                {"text": "🌐 শুধু Real Market", "callback_data": "mode_real"},
+                {"text": "⚡ শুধু OTC Market", "callback_data": "mode_otc"},
+                {"text": "🔄 Auto Mode", "callback_data": "mode_auto"}
+            ],
+            [{"text": "👥 ইউজার ও চ্যানেল লিস্ট দেখুন", "callback_data": "cmd_users"}],
             [
                 {"text": "🚫 Ban User", "callback_data": "info_ban"},
                 {"text": "✅ Unban User", "callback_data": "info_unban"}
@@ -392,8 +422,9 @@ def send_admin_panel(chat_id):
     text = (
         f"{VIP_HEADER}\n"
         "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        "🛠️ **অ্যাডভান্সড ভিআইপি অ্যাডমিন প্যানেল** 🛠️\n\n"
-        "স্বাগতম রাহাত ভাই! নিচের যেকোনো বাটনে ক্লিক করে আপনি বটের স্টিকার, ব্যানার, টেক্সট, লিংক বা ইউজার সরাসরি নিয়ন্ত্রণ করতে পারবেন:"
+        f"🛠️ **অ্যাডভান্সড ভিআইপি অ্যাডমিন প্যানেল** 🛠️\n"
+        f"📊 **বর্তমান মার্কেট মোড:** `{SETTINGS['market_mode']}`\n\n"
+        "💡 **প্রাইভেট চ্যানেল যুক্ত করার নিয়ম:** আপনার প্রাইভেট চ্যানেল থেকে যেকোনো একটি পুরনো মেসেজ এই বটে **Forward (ফরওয়ার্ড)** করুন, বট নিজে থেকেই চ্যানেল যুক্ত করে নেবে!"
     )
     requests.post(url, json={"chat_id": chat_id, "text": text, "parse_mode": "Markdown", "reply_markup": json.dumps(keyboard)})
 
@@ -410,6 +441,7 @@ def download_telegram_file(file_id, save_filename):
     return None
 
 def poll_telegram_admin_commands():
+    global force_instant_session
     offset = 0
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates"
     while True:
@@ -419,6 +451,19 @@ def poll_telegram_admin_commands():
                 data = res.json()
                 for result in data.get("result", []):
                     offset = result["update_id"] + 1
+                    
+                    # ১. প্রাইভেট চ্যানেলে কেউ পোস্ট করলে বা বটকে অ্যাডমিন রাখলে অটোমেটিক চ্যানেল আইডি ধরে নেবে
+                    if "channel_post" in result:
+                        ch_id = result["channel_post"].get("chat", {}).get("id")
+                        if ch_id:
+                            BOT_USERS.add(str(ch_id))
+                        continue
+
+                    if "my_chat_member" in result:
+                        ch_id = result["my_chat_member"].get("chat", {}).get("id")
+                        if ch_id:
+                            BOT_USERS.add(str(ch_id))
+                        continue
                     
                     if "callback_query" in result:
                         cq = result["callback_query"]
@@ -433,16 +478,28 @@ def poll_telegram_admin_commands():
                             requests.post(answer_url, json={"callback_query_id": cq_id, "text": "শুধুমাত্র অ্যাডমিন ব্যবহার করতে পারবেন!"})
                             continue
                             
-                        if data_val == "cmd_users":
+                        if data_val == "cmd_start_now":
+                            force_instant_session = True
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "🚀 **কমান্ড গৃহীত!** এখনই নতুন করে বিসমিল্লাহ ব্যানার ও রুলস পাঠিয়ে পূর্ণ ১ ঘণ্টার লাইভ সেশন শুরু হচ্ছে!", "parse_mode": "Markdown"})
+                        elif data_val == "mode_real":
+                            SETTINGS["market_mode"] = "REAL_ONLY"
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "🌐 **Market Mode Updated:** এখন থেকে শুধুমাত্র **Real Market** (যেমন `EUR/USD`, `GBP/USD`) সিগন্যাল দেওয়া হবে!", "parse_mode": "Markdown"})
+                        elif data_val == "mode_otc":
+                            SETTINGS["market_mode"] = "OTC_ONLY"
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "⚡ **Market Mode Updated:** এখন থেকে শুধুমাত্র **OTC Market** (যেমন `EUR/USD (OTC)`, `USD/BRL (OTC)`) সিগন্যাল দেওয়া হবে!", "parse_mode": "Markdown"})
+                        elif data_val == "mode_auto":
+                            SETTINGS["market_mode"] = "AUTO"
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "🔄 **Market Mode Updated:** এখন থেকে বট দিন ও সময়ের ওপর ভিত্তি করে স্বয়ংক্রিয়ভাবে **Real বা OTC** পেয়ার সিলেক্ট করবে!", "parse_mode": "Markdown"})
+                        elif data_val == "cmd_users":
                             u_list = (
-                                f"👥 মোট যুক্ত চ্যাট/ইউজার: {len(BOT_USERS)}\n"
-                                f"🚫 ব্যান করা ইউজার: {len(BANNED_USERS)}\n\n"
-                                f"📌 Active List: `{list(BOT_USERS)}`\n"
-                                f"📌 Banned List: `{list(BANNED_USERS)}`"
+                                f"👥 মোট যুক্ত চ্যাট/চ্যানেল: {len(BOT_USERS)}\n"
+                                f"🚫 ব্যান করা ইউজার: {len(BANNED_USERS)}\n"
+                                f"📊 বর্তমান মার্কেট মোড: `{SETTINGS['market_mode']}`\n\n"
+                                f"📌 Active List: `{list(BOT_USERS)}`"
                             )
                             requests.post(send_url, json={"chat_id": chat_id, "text": u_list, "parse_mode": "Markdown"})
                         elif data_val == "info_ban":
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "কাউকে ব্যান করতে লিখুন:\n`/ban [Chat_ID]`\nনতুন কাউকে যুক্ত করতে লিখুন:\n`/adduser [Chat_ID]`", "parse_mode": "Markdown"})
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "কাউকে ব্যান করতে লিখুন:\n`/ban [Chat_ID]`\nনতুন চ্যানেল বা ইউজার যুক্ত করতে লিখুন:\n`/adduser [Chat_ID]`", "parse_mode": "Markdown"})
                         elif data_val == "info_unban":
                             requests.post(send_url, json={"chat_id": chat_id, "text": "ব্যান তুলতে লিখুন:\n`/unban [Chat_ID]`", "parse_mode": "Markdown"})
                         elif data_val == "info_win":
@@ -484,14 +541,32 @@ def poll_telegram_admin_commands():
                         continue
                     BOT_USERS.add(str(chat_id))
                     
+                    send_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+
+                    # ২. অ্যাডমিন যদি প্রাইভেট চ্যানেলের কোনো মেসেজ বটে ফরওয়ার্ড করে, বট সাথে সাথে সেই প্রাইভেট চ্যানেলের আইডি যুক্ত করে নেবে!
+                    if chat_id == ADMIN_CHAT_ID and ("forward_from_chat" in msg or "forward_origin" in msg):
+                        fwd_chat = msg.get("forward_from_chat") or msg.get("forward_origin", {}).get("chat")
+                        if fwd_chat and "id" in fwd_chat:
+                            priv_id = str(fwd_chat["id"])
+                            priv_title = fwd_chat.get("title", "Private Channel")
+                            BOT_USERS.add(priv_id)
+                            requests.post(send_url, json={
+                                "chat_id": chat_id,
+                                "text": f"✅ **প্রাইভেট চ্যানেল সফলভাবে যুক্ত হয়েছে!**\n📢 নাম: `{priv_title}`\n🆔 Chat ID: `{priv_id}`\n\nএখন থেকে সব ব্যানার, রুলস এবং সিগন্যাল সরাসরি এই প্রাইভেট চ্যানেলেও যাবে!",
+                                "parse_mode": "Markdown"
+                            })
+                            continue
+
                     if chat_id != ADMIN_CHAT_ID:
                         continue
-                        
-                    send_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
                     
                     if text in ["/start", "/admin"]:
                         send_admin_panel(chat_id)
                         
+                    elif text == "/startnow":
+                        force_instant_session = True
+                        requests.post(send_url, json={"chat_id": chat_id, "text": "🚀 এখনই ১ ঘণ্টার লাইভ সেশন শুরু হচ্ছে!"})
+
                     elif text == "/users":
                         u_list = f"👥 Total Users: {len(BOT_USERS)}\n🚫 Banned Users: {len(BANNED_USERS)}\n\nActive: {list(BOT_USERS)}"
                         requests.post(send_url, json={"chat_id": chat_id, "text": u_list})
@@ -588,12 +663,12 @@ def wait_until(target_dt, tz):
             break
         time.sleep(min(remaining, 1.0))
 
-# --- [MAIN VIP TRADING ENGINE: ZERO CONSECUTIVE LOSS & HIGH DIRECT WIN] ---
+# --- [MAIN VIP TRADING ENGINE: FULL 60-MIN SESSION & ZERO CONSECUTIVE LOSS] ---
 def run_vip_trading_bot():
-    global session_wins, session_losses, last_was_loss
+    global session_wins, session_losses, last_was_loss, force_instant_session
     print("=====================================================")
     print(f"🚀 {VIP_HEADER} Ultimate Bot Started!")
-    print("⏰ Sessions: 10:00 AM, 02:00 PM, 08:00 PM (UTC+6) | Zero Back-to-Back Loss")
+    print("⏰ Sessions: 10:00 AM, 02:00 PM, 08:00 PM (UTC+6) | Full 60-Minute Duration")
     print("=====================================================")
     
     current_session_date = None
@@ -601,7 +676,9 @@ def run_vip_trading_bot():
     session_completed_flag = {10: False, 14: False, 20: False}
     reminder_sent_flag = {10: False, 14: False, 20: False}
     
-    active_session_hour = None
+    session_active = False
+    active_session_key = None
+    session_end_dt = None  # ঠিক ৬০ মিনিট (১ ঘণ্টা) পর সেশন শেষ হওয়ার টাইমস্ট্যাম্প
     
     while True:
         tz = pytz.timezone(TIMEZONE)
@@ -610,12 +687,11 @@ def run_vip_trading_bot():
         current_hour = now.hour
         current_minute = now.minute
         
-        if current_session_date != today_str:
+        if current_session_date != today_str and not session_active:
             current_session_date = today_str
             session_started_flag = {10: False, 14: False, 20: False}
             session_completed_flag = {10: False, 14: False, 20: False}
             reminder_sent_flag = {10: False, 14: False, 20: False}
-            active_session_hour = None
             
         active_hours = [10, 14, 20]
         
@@ -634,13 +710,23 @@ def run_vip_trading_bot():
                     with_button=True
                 )
                 
-        # ২. সেশন শুরুর ৫ মিনিট আগে বিসমিল্লাহ ও বিশাল স্টার্ট ব্যানার
-        for h in active_hours:
-            is_pre_session = (current_hour == h - 1 and current_minute >= 55)
-            is_in_session = (current_hour == h and not session_completed_flag[h])
-            
-            if (is_pre_session or is_in_session) and not session_started_flag[h]:
-                session_started_flag[h] = True
+        # ২. সেশন শুরুর লজিক (নির্ধারিত সময়ে অথবা অ্যাডমিন বাটন চাপলে সাথে সাথে পূর্ণ ১ ঘণ্টার জন্য শুরু হবে)
+        if not session_active:
+            trigger_hour = None
+            for h in active_hours:
+                is_pre_session = (current_hour == h - 1 and current_minute >= 55)
+                is_in_session = (current_hour == h and not session_completed_flag[h])
+                if (is_pre_session or is_in_session) and not session_started_flag[h]:
+                    trigger_hour = h
+                    session_started_flag[h] = True
+                    break
+
+            if force_instant_session or trigger_hour is not None:
+                force_instant_session = False
+                session_active = True
+                active_session_key = trigger_hour
+                # ঠিক এখন থেকে পূর্ণ ৬০ মিনিট (১ ঘণ্টা) পর্যন্ত সেশন চলবে!
+                session_end_dt = now + datetime.timedelta(minutes=60)
                 session_wins = 0
                 session_losses = 0
                 last_was_loss = False
@@ -652,21 +738,28 @@ def run_vip_trading_bot():
                     f"{VIP_HEADER}\n"
                     f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                     f"🟢 **【 𝐕𝐈𝐏 𝐒𝐄𝐒𝐒𝐈𝐎𝐍 𝐒𝐓𝐀𝐑𝐓𝐒 】** 🟢\n\n"
-                    f"মহান আল্লাহর নামে আমাদের আজকের ভিআইপি ট্রেডিং সেশন শুরু হলো! সবাই **১ মিনিটের (1M) চার্ট** ওপেন করে আমাদের স্নাইপার সিগন্যালের জন্য প্রস্তুত থাকুন।",
+                    f"মহান আল্লাহর নামে আমাদের আজকের ভিআইপি ট্রেডিং সেশন শুরু হলো! আগামী **১ ঘণ্টা** সবাই **১ মিনিটের (1M) চার্ট** ওপেন করে আমাদের স্নাইপার সিগন্যালের জন্য প্রস্তুত থাকুন।",
                     with_buttons=True
                 )
                 time.sleep(2)
                 broadcast_text(SETTINGS["rules_text"], with_button=True)
                 
         # ৩. ১ ঘণ্টার কোয়ালিটি সেশন ইঞ্জিন
-        if current_hour in active_hours and not session_completed_flag[current_hour]:
-            active_session_hour = current_hour
-            
-        if active_session_hour is not None:
+        if session_active:
             now = datetime.datetime.now(tz)
-            if now.hour != active_session_hour or now.minute >= 55:
-                session_completed_flag[active_session_hour] = True
+            # পূর্ণ ৬০ মিনিট শেষ হয়েছে কি না চেক
+            if now >= session_end_dt or force_instant_session:
+                if force_instant_session:
+                    # অ্যাডমিন যদি সেশন চলাকালীন আবার রিস্টার্ট বাটন চাপে, তবে নতুন করে শুরু করার জন্য
+                    session_active = False
+                    continue
+
+                if active_session_key in session_completed_flag:
+                    session_completed_flag[active_session_key] = True
+                session_active = False
+                active_session_key = None
                 time.sleep(3)
+                
                 end_banner = generate_session_banner(is_start=False)
                 s_total = session_wins + session_losses
                 s_rate = int((session_wins / s_total) * 100) if s_total > 0 else 100
@@ -685,18 +778,25 @@ def run_vip_trading_bot():
                     f"আলহামদুলিল্লাহ, দারুণ একুরেসির সাথে আমাদের আজকের সেশনটি সম্পন্ন হয়েছে! সবাই আজকের প্রফিট সুরক্ষিত রাখুন। পরবর্তী সেশনে আবারও সবার সাথে দেখা হবে ইনশাআল্লাহ!"
                 )
                 broadcast_photo(end_banner, end_msg, with_buttons=True)
-                active_session_hour = None
                 continue
 
             if (session_wins + session_losses) == 0:
-                scan_wait = random.randint(20, 40)
+                scan_wait = random.randint(15, 30)
             else:
-                scan_wait = random.randint(150, 300)
+                scan_wait = random.randint(140, 260)
                 
-            time.sleep(scan_wait)
+            # স্ক্যান করার সময় প্রতি সেকেন্ডে চেক করবে অ্যাডমিন রিস্টার্ট দিয়েছে কি না
+            for _ in range(scan_wait):
+                if force_instant_session:
+                    break
+                time.sleep(1)
+                
+            if force_instant_session:
+                session_active = False
+                continue
             
             sig_now = datetime.datetime.now(tz)
-            if sig_now.hour != active_session_hour or sig_now.minute >= 55:
+            if sig_now >= session_end_dt:
                 continue
 
             if sig_now.second > 8:
@@ -712,7 +812,8 @@ def run_vip_trading_bot():
             exit_time_obj = entry_time_obj + datetime.timedelta(minutes=exp_minutes)
             timeset = exit_time_obj.strftime("%H:%M")
             
-            asset = random.choice(HIGH_PAYOUT_PAIRS)
+            # কোটেক্সের সঠিক ও চালু থাকা পেয়ার নির্বাচন
+            asset = get_active_quotex_pair(sig_now)
             direction = random.choice(["CALL", "PUT"])
             
             market_setup = analyze_and_create_market_setup(direction)
@@ -725,7 +826,6 @@ def run_vip_trading_bot():
             
             chart_file = render_snr_chart(asset, "M3", direction, market_setup, is_result=False, filename="signal_chart.png")
             
-            # আকর্ষণীয় ও সুশৃঙ্খল সিগন্যাল ক্যাপশন
             signal_caption = (
                 f"{VIP_HEADER}\n"
                 f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -746,9 +846,6 @@ def run_vip_trading_bot():
             # =================================================================
             # 🛡️ [ZERO CONSECUTIVE LOSS & DIRECT WIN PRIORITY ENGINE]
             # =================================================================
-            # ১. যদি আগের সিগন্যালটি লস হয়ে থাকে, তবে এই সিগন্যালটি ১০০% প্রফিট হবেই (লস হওয়ার সম্ভাবনা 0%)।
-            # ২. তাছাড়া পুরো সেশনে সর্বোচ্চ ১টির বেশি লস কখনোই হবে না (session_losses >= 1 হলে আর কোনো লস নেই)।
-            # ৩. বেশিরভাগ ট্রেড প্রথম স্টেপেই (DIRECT_WIN = 86%+) প্রফিট হবে।
             if last_was_loss or session_losses >= 1:
                 outcome = random.choices(["DIRECT_WIN", "MTG_WIN"], weights=[92, 8], k=1)[0]
                 last_was_loss = False
@@ -758,10 +855,8 @@ def run_vip_trading_bot():
                     last_was_loss = True
             # =================================================================
                     
-            # ১ম ধাপ: মূল ৩টি ক্যান্ডেল (৩ মিনিট) পুরোপুরি শেষ হওয়া পর্যন্ত কঠোরভাবে অপেক্ষা করবে
             wait_until(exit_time_obj + datetime.timedelta(seconds=3), tz)
             
-            # ২য় ধাপ: যদি ট্রেডটি MTG_WIN বা LOSS হয়, তবে আরও ৩টি ক্যান্ডেল (পূর্ণ ৩ মিনিট) শেষ হওয়া পর্যন্ত অপেক্ষা করবে
             if outcome in ["MTG_WIN", "LOSS"]:
                 mtg_exit_obj = exit_time_obj + datetime.timedelta(minutes=exp_minutes)
                 wait_until(mtg_exit_obj + datetime.timedelta(seconds=3), tz)
@@ -802,7 +897,7 @@ def run_vip_trading_bot():
             broadcast_sticker(generate_result_sticker(is_win))
             
         else:
-            time.sleep(15)
+            time.sleep(5)
 
 if __name__ == "__main__":
     threading.Thread(target=start_keep_alive_server, daemon=True).start()
