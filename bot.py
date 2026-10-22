@@ -18,8 +18,8 @@ from PIL import Image, ImageDraw, ImageFont
 # =====================================================================
 BOT_TOKEN = "8938988396:AAEUvJyoWUuzc8NB9Y2LyNPIrwD-LL6NM00"
 
-# ১. শুধুমাত্র ভিআইপি চ্যানেল ও অ্যাডমিন (যেখানে সিগন্যাল ও সবকিছু যাবে)
-VIP_CHATS = ["8699074327"]
+# ১. প্রাইভেট ভিআইপি চ্যানেলের আইডি (-1004473220995) স্থায়ীভাবে বসিয়ে দেওয়া হয়েছে!
+VIP_CHATS = ["-1004473220995", "8699074327"]
 
 # ২. শুধুমাত্র ফ্রি পাবলিক চ্যানেল (যেখানে কখনোই সিগন্যাল যাবে না, শুধু প্রমোশন ও সেশন সামারি যাবে)
 FREE_PUBLIC_CHATS = ["@traderrahat420"]
@@ -31,12 +31,10 @@ ADMIN_USERNAME = "@RahatDm"
 TIMEZONE = "Asia/Dhaka"  # UTC+6
 VIP_HEADER = "👑 𝐓𝐫𝐚𝐝𝐞𝐫 𝐑𝐚𝐡𝐚𝐭 | 𝐓𝐑 𝐕𝐈𝐏 𝟗𝟗𝟗 👑"
 
-# কোটেক্সের শতভাগ নিশ্চিত এবং হাই-পেআউট রিয়েল পেয়ারসমূহ
 REAL_MARKET_PAIRS = [
     "EUR/USD", "GBP/USD", "EUR/JPY", "GBP/JPY", "AUD/USD", "USD/JPY", "EUR/GBP"
 ]
 
-# কোটেক্সের ২৪ ঘণ্টা খোলা থাকা ওটিসি পেয়ারসমূহ
 OTC_MARKET_PAIRS = [
     "EUR/USD (OTC)", "GBP/USD (OTC)", "USD/JPY (OTC)", "AUD/USD (OTC)",
     "NZD/USD (OTC)", "EUR/GBP (OTC)", "USD/BRL (OTC)", "USD/BDT (OTC)"
@@ -49,7 +47,7 @@ SETTINGS = {
     "loss_sticker_text": "LOSS",
     "refund_sticker_text": "REFUND",
     "market_mode": "REAL_ONLY",
-    "max_quality_signals_per_session": 4,
+    "max_quality_signals_per_session": 5,  # প্রতি সেশনে সর্বোচ্চ ৫টি গোল্ডেন সিগন্যাল
     "custom_start_banner": None,
     "custom_end_banner": None,
     "custom_win_sticker": None,
@@ -59,7 +57,7 @@ SETTINGS = {
         "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
         "📜 **ভিআইপি ক্যাপিটাল প্রোটেকশন ও মানি ম্যানেজমেন্ট রুলস:**\n\n"
         "💎 **আমাদের মূল মন্ত্র: কোয়ান্টিটি নয়, কোয়ালিটি!**\n"
-        "• আমরা সেশনে অযথা ১০-১৫টি সিগন্যাল দিয়ে ব্যালেন্স ঝুঁকিতে ফেলি না। পুরো ১ ঘণ্টা মার্কেট গভীরভাবে রিসার্চ ও ফিল্টার করে মাত্র **৩ থেকে ৪টি গোল্ডেন স্নাইপার (Sureshot) সিগন্যাল** দেওয়া হবে।\n\n"
+        "• আমরা সেশনে অযথা ১০-১৫টি সিগন্যাল দিয়ে ব্যালেন্স ঝুঁকিতে ফেলি না। পুরো ১ ঘণ্টা মার্কেট গভীরভাবে রিসার্চ ও ফিল্টার করে মাত্র **৪ থেকে ৫টি গোল্ডেন স্নাইপার (Sureshot) সিগন্যাল** দেওয়া হবে।\n\n"
         "🎯 **ট্রেড এন্ট্রি নেওয়ার নিয়ম:**\n"
         "• আপনার ডিভাইসের সময় **UTC+6 (বাংলাদেশ সময়)** অনুযায়ী মিলিয়ে রাখুন।\n"
         "• ব্রোকারে **১ মিনিটের (1M) ক্যান্ডেল চার্ট** ওপেন করবেন এবং পেআউট অবশ্যই ৮০%+ দেখে নিবেন।\n"
@@ -115,11 +113,7 @@ def is_free_public_chat(chat_obj):
         return True
     return False
 
-# --- [DEEP LIVE 1M CANDLE FETCHER (NO STALE CACHE / NO FALSE REFUND)] ---
 def fetch_live_market_price(pair_str):
-    """
-    ইয়াহু ফাইন্যান্সের ক্যাশ বাগ এড়াতে সরাসরি সর্বশেষ ১-মিনিটের ক্যান্ডেল ক্লোজ প্রাইস নিয়ে আসে।
-    """
     if "OTC" in pair_str:
         return None
     clean_symbol = pair_str.replace("/", "").strip() + "=X"
@@ -170,7 +164,7 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"TR VIP 999 Deep Research Sniper Bot Running!")
+        self.wfile.write(b"TR VIP 999 Anti-Restart & Double-Session-Lock Bot Running!")
     def log_message(self, format, *args):
         return
 
@@ -178,6 +172,17 @@ def start_keep_alive_server():
     port = int(os.environ.get("PORT", 8080))
     server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
     server.serve_forever()
+
+def self_ping_anti_sleep():
+    """রেন্ডারের ফ্রি সার্ভার যেন সেশন চলাকালীন রিস্টার্ট না নেয় সেজন্য প্রতি ৪ মিনিট পর পর সেলফ-পিং করবে"""
+    port = int(os.environ.get("PORT", 8080))
+    ext_url = os.environ.get("RENDER_EXTERNAL_URL", f"http://127.0.0.1:{port}")
+    while True:
+        time.sleep(240)
+        try:
+            requests.get(ext_url, timeout=10)
+        except Exception:
+            pass
 
 def generate_session_banner(is_start=True, filename="session_banner.png"):
     if is_start and SETTINGS["custom_start_banner"] and os.path.exists(SETTINGS["custom_start_banner"]):
@@ -254,15 +259,8 @@ def generate_result_sticker(outcome_type, filename="sticker.webp"):
     img.save(filename, "WEBP")
     return filename
 
-# --- [9-LAYER DEEP INSTITUTIONAL MARKET RESEARCH ENGINE] ---
 def analyze_and_create_market_setup(pair_str):
-    """
-    ৯-স্তরের গভীর মার্কেট রিসার্চ ও ট্রেন্ড ভেরিফিকেশন:
-    লাইভ মার্কেট থেকে সাম্প্রতিক ক্যান্ডেলগুলোর মোমেন্টাম, আরএসআই (RSI) এবং সাপোর্ট/রেজিস্ট্যান্স চেক করে
-    সবচেয়ে নিরাপদ ডিরেকশন (CALL অথবা PUT) নির্ধারণ করে।
-    """
     direction = random.choice(["CALL", "PUT"])
-    # রিয়েল মার্কেট হলে লাইভ ডেটা থেকে আরএসআই ও রিজেকশন চেক করার চেষ্টা করবে
     if "OTC" not in pair_str:
         clean_symbol = pair_str.replace("/", "").strip() + "=X"
         url = f"https://query1.finance.yahoo.com/v8/finance/chart/{clean_symbol}?interval=1m&range=1d"
@@ -275,7 +273,6 @@ def analyze_and_create_market_setup(pair_str):
                     recent_change = c_list[-1] - c_list[-5]
                     max_recent = max(c_list[:-1])
                     min_recent = min(c_list[:-1])
-                    # যদি প্রাইস সাপোর্ট জোনের কাছাকাছি এসে বুলিশ মোমেন্টাম নেয় -> CALL
                     if c_list[-1] <= min_recent + (max_recent - min_recent) * 0.35:
                         direction = "CALL"
                     elif c_list[-1] >= max_recent - (max_recent - min_recent) * 0.35:
@@ -476,7 +473,6 @@ def render_snr_chart(pair, timeframe, direction, setup_data, is_result=False, ou
     plt.close(fig)
     return filename
 
-# --- [STRICTLY SEPARATED VIP vs FREE BROADCASTERS] ---
 def broadcast_photo(photo_path, caption, with_buttons=True, target_group="VIP"):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
     reply_markup = {
@@ -557,7 +553,7 @@ def send_admin_trade_check_prompt(asset, direction, timetable, timeset):
         f"🔔 **অ্যাডমিন লাইভ ট্রেড ভেরিফিকেশন:**\n"
         f"🐉 পেয়ার: `{asset}` ({direction})\n"
         f"🕒 এন্ট্রি ছিল: `{timetable}` | ক্লোজিং: `{timeset}`\n\n"
-        f"👉 যদি দেখেন ৩য় ক্যান্ডেল এন্ট্রি লাইন পার করেনি এবং **আপনি MTG নিয়েছেন**, তবে ওপরে **⏳ ১ম ট্রেড মিস! MTG চলছে** বাটনে চাপ দিন!"
+        f"👉 শুধুমাত্র নিচের বাটনগুলো থেকে রেজাল্ট সিলেক্ট করুন (অ্যাডমিন প্যানেলের সেশন স্টার্ট বাটনে চাপ দেবেন না):"
     )
     try:
         requests.post(url, json={"chat_id": ADMIN_CHAT_ID, "text": msg, "parse_mode": "Markdown", "reply_markup": json.dumps(keyboard)}, timeout=10)
@@ -576,9 +572,9 @@ def send_admin_panel(chat_id):
                 {"text": "🔄 Auto Mode", "callback_data": "mode_auto"}
             ],
             [
-                {"text": "🎯 সেশন লিমিট: ৩টি সিগন্যাল", "callback_data": "limit_3"},
                 {"text": "🎯 সেশন লিমিট: ৪টি সিগন্যাল", "callback_data": "limit_4"},
-                {"text": "🎯 সেশন লিমিট: ৫টি সিগন্যাল", "callback_data": "limit_5"}
+                {"text": "🎯 সেশন লিমিট: ৫টি সিগন্যাল", "callback_data": "limit_5"},
+                {"text": "🎯 সেশন লিমিট: ৬টি সিগন্যাল", "callback_data": "limit_6"}
             ],
             [{"text": "⏳ চলমান ট্রেড MTG-র জন্য ৩ মিনিট হোল্ড করুন", "callback_data": "ovr_wait_mtg"}],
             [
@@ -590,27 +586,6 @@ def send_admin_panel(chat_id):
                 {"text": "❌ পরের রেজাল্ট: Loss", "callback_data": "ovr_loss"}
             ],
             [{"text": "👥 ভিআইপি ও ফ্রি চ্যানেল লিস্ট দেখুন", "callback_data": "cmd_users"}],
-            [
-                {"text": "🚫 Ban User", "callback_data": "info_ban"},
-                {"text": "✅ Unban User", "callback_data": "info_unban"}
-            ],
-            [
-                {"text": "✏️ Win স্টিকার টেক্সট", "callback_data": "info_win"},
-                {"text": "✏️ Loss স্টিকার টেক্সট", "callback_data": "info_loss"}
-            ],
-            [
-                {"text": "🖼️ নতুন Win স্টিকার সেট", "callback_data": "info_set_win_img"},
-                {"text": "🖼️ নতুন Loss স্টিকার সেট", "callback_data": "info_set_loss_img"}
-            ],
-            [
-                {"text": "🖼️ Start ব্যানার পরিবর্তন", "callback_data": "info_start"},
-                {"text": "🖼️ End ব্যানার পরিবর্তন", "callback_data": "info_end"}
-            ],
-            [
-                {"text": "🔗 চ্যানেল লিংক এডিট", "callback_data": "info_channel"},
-                {"text": "🔗 রেজিস্ট্রেশন লিংক এডিট", "callback_data": "info_reg"}
-            ],
-            [{"text": "📝 ভিআইপি রুলস মেসেজ এডিট করুন", "callback_data": "info_rules"}],
             [{"text": "🗑️ সব কাস্টম স্টিকার/ব্যানার ডিলিট ও রিসেট করুন", "callback_data": "cmd_reset_all"}]
         ]
     }
@@ -624,18 +599,6 @@ def send_admin_panel(chat_id):
         f"📢 **Free Channel List:** `{list(FREE_CHANNELS)}`"
     )
     requests.post(url, json={"chat_id": chat_id, "text": text, "parse_mode": "Markdown", "reply_markup": json.dumps(keyboard)})
-
-def download_telegram_file(file_id, save_filename):
-    file_info_url = f"https://api.telegram.org/bot{BOT_TOKEN}/getFile?file_id={file_id}"
-    f_res = requests.get(file_info_url).json()
-    if f_res.get("ok"):
-        file_path = f_res["result"]["file_path"]
-        download_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
-        img_data = requests.get(download_url).content
-        with open(save_filename, "wb") as handler:
-            handler.write(img_data)
-        return save_filename
-    return None
 
 def poll_telegram_admin_commands():
     global force_instant_session, manual_result_override
@@ -682,23 +645,23 @@ def poll_telegram_admin_commands():
                             
                         if data_val == "cmd_start_now":
                             force_instant_session = True
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "🚀 **কমান্ড গৃহীত!** এখনই ভিআইপি চ্যানেলে সেশন ও রুলস এবং ফ্রি চ্যানেলে প্রমোশন পাঠিয়ে লাইভ সেশন শুরু হচ্ছে!", "parse_mode": "Markdown"})
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "🚀 **কমান্ড গৃহীত!** নতুন লাইভ সেশন শুরু হচ্ছে!", "parse_mode": "Markdown"})
                         elif data_val == "cmd_send_promo_now":
                             broadcast_text(SETTINGS["promo_text"], with_button=True, target_group="FREE")
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "✅ ফ্রি পাবলিক চ্যানেলে প্রমোশনাল মেসেজ সফলভাবে পাঠানো হয়েছে!", "parse_mode": "Markdown"})
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "✅ ফ্রি পাবলিক চ্যানেলে প্রমোশনাল মেসেজ পাঠানো হয়েছে!", "parse_mode": "Markdown"})
                         elif data_val == "mode_real":
                             SETTINGS["market_mode"] = "REAL_ONLY"
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "🌐 **Market Mode Updated:** এখন থেকে শুধুমাত্র নিশ্চিত **Real Market** (যেমন `EUR/USD`) সিগন্যাল দেওয়া হবে!", "parse_mode": "Markdown"})
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "🌐 **Market Mode Updated:** শুধুমাত্র **Real Market** সিগন্যাল দেওয়া হবে!", "parse_mode": "Markdown"})
                         elif data_val == "mode_otc":
                             SETTINGS["market_mode"] = "OTC_ONLY"
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "⚡ **Market Mode Updated:** এখন থেকে শুধুমাত্র **OTC Market** সিগন্যাল দেওয়া হবে!", "parse_mode": "Markdown"})
+                            requests.post(send_url, json={"chat_id": chat_id, "text": "⚡ **Market Mode Updated:** শুধুমাত্র **OTC Market** সিগন্যাল দেওয়া হবে!", "parse_mode": "Markdown"})
                         elif data_val == "mode_auto":
                             SETTINGS["market_mode"] = "AUTO"
                             requests.post(send_url, json={"chat_id": chat_id, "text": "🔄 **Market Mode Updated:** অটো মোড সক্রিয় করা হয়েছে!", "parse_mode": "Markdown"})
-                        elif data_val in ["limit_3", "limit_4", "limit_5"]:
+                        elif data_val in ["limit_4", "limit_5", "limit_6"]:
                             lim = int(data_val.split("_")[1])
                             SETTINGS["max_quality_signals_per_session"] = lim
-                            requests.post(send_url, json={"chat_id": chat_id, "text": f"💎 **Quality Limit Updated:** প্রতি সেশনে সর্বোচ্চ **{lim}টি গোল্ডেন সিগন্যাল** দেওয়ার পর প্রফিট লক হবে!", "parse_mode": "Markdown"})
+                            requests.post(send_url, json={"chat_id": chat_id, "text": f"💎 **Quality Limit Updated:** প্রতি সেশনে সর্বোচ্চ **{lim}টি প্রফিট** হওয়ার পর সেশন ক্লোজ হবে!", "parse_mode": "Markdown"})
                         elif data_val == "ovr_wait_mtg":
                             manual_result_override = "WAIT_MTG"
                             requests.post(send_url, json={"chat_id": chat_id, "text": "⏳ **MTG হোল্ড অ্যাক্টিভেটেড!** বট আরও ৩ মিনিট অপেক্ষা করে MTG রেজাল্ট দেবে!", "parse_mode": "Markdown"})
@@ -717,32 +680,9 @@ def poll_telegram_admin_commands():
                         elif data_val == "cmd_users":
                             u_list = (
                                 f"👑 **VIP Channels (Signals):** `{list(BOT_USERS)}`\n"
-                                f"📢 **Free Public Channels (Promo Only):** `{list(FREE_CHANNELS)}`\n"
-                                f"🚫 **Banned List:** `{list(BANNED_USERS)}`"
+                                f"📢 **Free Public Channels (Promo Only):** `{list(FREE_CHANNELS)}`"
                             )
                             requests.post(send_url, json={"chat_id": chat_id, "text": u_list, "parse_mode": "Markdown"})
-                        elif data_val == "info_ban":
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "কাউকে ব্যান করতে লিখুন:\n`/ban [Chat_ID]`\nনতুন ভিআইপি চ্যানেল যুক্ত করতে:\n`/adduser [Chat_ID]`\nনতুন ফ্রি চ্যানেল যুক্ত করতে:\n`/addfree [@channel_username]`", "parse_mode": "Markdown"})
-                        elif data_val == "info_unban":
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "ব্যান তুলতে লিখুন:\n`/unban [Chat_ID]`", "parse_mode": "Markdown"})
-                        elif data_val == "info_win":
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "Win স্টিকারের টেক্সট পরিবর্তন করতে লিখুন:\n`/setwin WIN`", "parse_mode": "Markdown"})
-                        elif data_val == "info_loss":
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "Loss স্টিকারের টেক্সট পরিবর্তন করতে লিখুন:\n`/setloss LOSS`", "parse_mode": "Markdown"})
-                        elif data_val == "info_set_win_img":
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "নতুন Win স্টিকার সেট করতে ছবিতে Reply দিয়ে লিখুন: `/setwinimg`", "parse_mode": "Markdown"})
-                        elif data_val == "info_set_loss_img":
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "নতুন Loss স্টিকার সেট করতে ছবিতে Reply দিয়ে লিখুন: `/setlossimg`", "parse_mode": "Markdown"})
-                        elif data_val == "info_start":
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "নতুন Start ব্যানার সেট করতে ছবিতে Reply দিয়ে লিখুন: `/setstartsticker`", "parse_mode": "Markdown"})
-                        elif data_val == "info_end":
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "নতুন End ব্যানার সেট করতে ছবিতে Reply দিয়ে লিখুন: `/setendsticker`", "parse_mode": "Markdown"})
-                        elif data_val == "info_channel":
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "চ্যানেল লিংক পরিবর্তন করতে লিখুন:\n`/setchannel [link]`", "parse_mode": "Markdown"})
-                        elif data_val == "info_reg":
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "রেজিস্ট্রেশন লিংক পরিবর্তন করতে লিখুন:\n`/setreg [link]`", "parse_mode": "Markdown"})
-                        elif data_val == "info_rules":
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "রুলস এডিট করতে লিখুন:\n`/setrules [rules]`", "parse_mode": "Markdown"})
                         elif data_val == "cmd_reset_all":
                             SETTINGS["custom_start_banner"] = None
                             SETTINGS["custom_end_banner"] = None
@@ -758,7 +698,6 @@ def poll_telegram_admin_commands():
                     msg = result.get("message", {})
                     chat_id = msg.get("chat", {}).get("id")
                     text = msg.get("text", "").strip()
-                    reply_to = msg.get("reply_to_message")
                     
                     if not chat_id:
                         continue
@@ -774,16 +713,11 @@ def poll_telegram_admin_commands():
                             priv_title = fwd_chat.get("title", "Channel")
                             if is_free_public_chat(fwd_chat):
                                 BOT_USERS.discard(priv_id)
-                                requests.post(send_url, json={
-                                    "chat_id": chat_id,
-                                    "text": f"📢 এটি আপনার **ফ্রি পাবলিক চ্যানেল** (`{priv_title}`)! এখানে কোনো সিগন্যাল যাবে না, শুধুমাত্র প্রমোশনাল মেসেজ ও সেশন সামারি যাবে।",
-                                    "parse_mode": "Markdown"
-                                })
                             else:
                                 BOT_USERS.add(priv_id)
                                 requests.post(send_url, json={
                                     "chat_id": chat_id,
-                                    "text": f"✅ **প্রাইভেট ভিআইপি চ্যানেল সফলভাবে যুক্ত হয়েছে!**\n📢 নাম: `{priv_title}`\n🆔 Chat ID: `{priv_id}`\n\nএখন থেকে সব সিগন্যাল শুধুমাত্র এই ভিআইপি চ্যানেলেই যাবে!",
+                                    "text": f"✅ **প্রাইভেট ভিআইপি চ্যানেল যুক্ত রয়েছে!**\n📢 নাম: `{priv_title}`\n🆔 Chat ID: `{priv_id}`",
                                     "parse_mode": "Markdown"
                                 })
                             continue
@@ -793,57 +727,6 @@ def poll_telegram_admin_commands():
                     
                     if text in ["/start", "/admin"]:
                         send_admin_panel(chat_id)
-                        
-                    elif text == "/startnow":
-                        force_instant_session = True
-                        requests.post(send_url, json={"chat_id": chat_id, "text": "🚀 এখনই সেশন শুরু হচ্ছে!"})
-
-                    elif text.startswith("/adduser "):
-                        a_id = text.replace("/adduser ", "").strip()
-                        BOT_USERS.add(a_id)
-                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ ভিআইপি চ্যানেল {a_id} যুক্ত করা হয়েছে।"})
-
-                    elif text.startswith("/addfree "):
-                        f_id = text.replace("/addfree ", "").strip()
-                        FREE_CHANNELS.add(f_id)
-                        BOT_USERS.discard(f_id)
-                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ ফ্রি চ্যানেল {f_id} যুক্ত করা হয়েছে।"})
-
-                    elif text.startswith("/ban "):
-                        b_id = text.replace("/ban ", "").strip()
-                        BANNED_USERS.add(str(b_id))
-                        BOT_USERS.discard(str(b_id))
-                        requests.post(send_url, json={"chat_id": chat_id, "text": f"🚫 আইডি {b_id} ভিআইপি থেকে রিমুভ/ব্যান করা হয়েছে।"})
-                        
-                    elif text.startswith("/unban "):
-                        u_id = text.replace("/unban ", "").strip()
-                        BANNED_USERS.discard(str(u_id))
-                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ ইউজার {u_id} আনব্যান করা হয়েছে।"})
-                        
-                    elif text.startswith("/setwin "):
-                        new_w = text.replace("/setwin ", "").strip()
-                        SETTINGS["win_sticker_text"] = new_w
-                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ Win টেক্সট আপডেট: {new_w}"})
-                        
-                    elif text.startswith("/setloss "):
-                        new_l = text.replace("/setloss ", "").strip()
-                        SETTINGS["loss_sticker_text"] = new_l
-                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ Loss টেক্সট আপডেট: {new_l}"})
-                        
-                    elif text.startswith("/setchannel "):
-                        new_c = text.replace("/setchannel ", "").strip()
-                        SETTINGS["channel_link"] = new_c
-                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ চ্যানেল লিংক আপডেট: {new_c}"})
-                        
-                    elif text.startswith("/setreg "):
-                        new_r = text.replace("/setreg ", "").strip()
-                        SETTINGS["register_link"] = new_r
-                        requests.post(send_url, json={"chat_id": chat_id, "text": f"✅ রেজিস্ট্রেশন লিংক আপডেট: {new_r}"})
-
-                    elif text.startswith("/setrules "):
-                        new_rules = text.replace("/setrules ", "").strip()
-                        SETTINGS["rules_text"] = new_rules
-                        requests.post(send_url, json={"chat_id": chat_id, "text": "✅ রুলস আপডেট হয়েছে!"})
                             
         except Exception as e:
             print(f"Admin poll error: {e}")
@@ -887,56 +770,58 @@ def run_vip_trading_bot():
             
         active_hours = [10, 14, 20]
         
-        # ১. ঠিক ৩০ মিনিট আগে: ভিআইপিতে রিমাইন্ডার এবং ফ্রি চ্যানেলে বিস্তারিত জয়েনিং ও ভেরিফিকেশন গাইড
+        # ১. ঠিক ৩০ মিনিট আগে রিমাইন্ডার
         for h in active_hours:
             remind_hour = h - 1
             if current_hour == remind_hour and 30 <= current_minute <= 35 and not reminder_sent_flag[h]:
                 reminder_sent_flag[h] = True
-                # ভিআইপি চ্যানেলে
                 broadcast_text(
                     f"{VIP_HEADER}\n"
                     f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                     f"🔔 **ভিআইপি ট্রেডিং সেশন রিমাইন্ডার** 🔔\n\n"
                     f"আসসালামু আলাইকুম প্রিয় ভিআইপি সদস্যবৃন্দ,\n"
                     f"আগামী **৩০ মিনিটের** মধ্যে আমাদের অফিশিয়াল ডিপ-রিসার্চ **SNR ও প্রাইস অ্যাকশন** ট্রেডিং সেশন শুরু হতে যাচ্ছে!\n\n"
-                    f"💎 আমাদের লক্ষ্য সংখ্যা বাড়ানো নয়, বরং বাছাইকৃত **৩ থেকে ৪টি গোল্ডেন সিগন্যালে** শতভাগ নিরাপদে প্রফিট বের করে আনা। সবাই দ্রুত ব্রোকারে লগইন করে প্রস্তুত হয়ে যান!",
+                    f"💎 সবাই দ্রুত ব্রোকারে লগইন করে প্রস্তুত হয়ে যান!",
                     with_button=True,
                     target_group="VIP"
                 )
-                # ফ্রি পাবলিক চ্যানেলে (আপনার নির্দেশ অনুযায়ী লিংক + ভেরিফাই + ইনবক্স গাইড)
                 broadcast_text(
                     f"{VIP_HEADER}\n"
                     f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                     f"🔥 **দারুণ খবর! আর মাত্র ৩০ মিনিট পর আমাদের VIP সেশন শুরু হচ্ছে!** 🔥\n\n"
-                    f"বাইনারি ট্রেডিংয়ে কি বারবার লস করে ব্যালেন্স জিরো করছেন? আর নয় লস! আজকের সেশনেই আমাদের সাথে ডিপ-রিসার্চ করা ১০০% কনফার্মেশন এবং স্নাইপার এসএনআর (SNR) সিগন্যাল নিয়ে প্রতিদিন নিশ্চিত প্রফিট করুন।\n\n"
                     f"💎 **কীভাবে ফ্রিতে ভিআইপি (VIP) চ্যানেলে জয়েন করবেন?**\n"
                     f"১️⃣ প্রথমে নিচের অফিশিয়াল রেজিস্ট্রেশন লিংকে ক্লিক করে ব্রোকার অ্যাকাউন্ট খুলুন।\n"
                     f"২️⃣ এরপর আপনার অ্যাকাউন্টটি সম্পূর্ণ **Verify (ভেরিফাই)** করে নিন।\n"
                     f"৩️⃣ ভেরিফাই করার পর আপনার **User ID (UID)** আমার ইনবক্সে পাঠিয়ে দিন—সাথে সাথে আপনাকে লাইফটাইম ফ্রি **VIP Channel**-এ অ্যাড করে নেওয়া হবে!\n\n"
                     f"🔗 **অফিশিয়াল রেজিস্ট্রেশন লিংক:**\n"
                     f"👉 {SETTINGS['register_link']}\n\n"
-                    f"❓ **অ্যাকাউন্ট খুলতে বা ভেরিফাই করতে পারছেন না? কিংবা বুঝতে সমস্যা হচ্ছে?**\n"
-                    f"কোনো চিন্তা নেই! না পারলে বা না বুঝলে সরাসরি আমার ইনবক্সে মেসেজ দিন, আমি নিজে আপনাকে সবকিছু বুঝিয়ে সাহায্য করব ইনশাআল্লাহ!\n\n"
-                    f"📥 **সরাসরি অ্যাডমিন ইনবক্স ও UID পাঠানোর ঠিকানা:** {ADMIN_USERNAME}",
+                    f"❓ **না পারলে বা না বুঝলে সরাসরি আমার ইনবক্সে মেসেজ দিন, আমি নিজে আপনাকে সবকিছু বুঝিয়ে সাহায্য করব ইনশাআল্লাহ!**\n"
+                    f"📥 **সরাসরি অ্যাডমিন ইনবক্স:** {ADMIN_USERNAME}",
                     with_button=True,
                     target_group="FREE"
                 )
                 
-        # ২. সেশন শুরু: ভিআইপিতে স্টার্ট ব্যানার + রুলস | ফ্রি চ্যানেলে স্টার্ট অ্যালার্ট + ভেরিফিকেশন ও ইনবক্স গাইড
+        # ২. সেশন শুরু (ডাবল সেশন লক যুক্ত করা হয়েছে যাতে কখনোই ২ বার শুরু না হয়!)
         if not session_active:
             trigger_hour = None
             for h in active_hours:
                 is_pre_session = (current_hour == h - 1 and current_minute >= 55)
-                is_in_session = (current_hour == h and not session_completed_flag[h])
+                # শুধুমাত্র প্রথম ১৫ মিনিটের মধ্যে অটো-স্টার্ট হবে যাতে সেশন শেষ হওয়ার পর বা রিস্টার্ট নিলে পুনরায় শুরু না হয়!
+                is_in_session = (current_hour == h and current_minute <= 15 and not session_completed_flag[h])
                 if (is_pre_session or is_in_session) and not session_started_flag[h]:
                     trigger_hour = h
                     session_started_flag[h] = True
+                    session_completed_flag[h] = True  # সাথে সাথে লক করে দেওয়া হলো যাতে দ্বিতীয়বার আর শুরু না হয়!
                     break
 
             if force_instant_session or trigger_hour is not None:
                 force_instant_session = False
                 session_active = True
-                active_session_key = trigger_hour
+                active_session_key = trigger_hour if trigger_hour is not None else current_hour
+                if active_session_key in session_started_flag:
+                    session_started_flag[active_session_key] = True
+                    session_completed_flag[active_session_key] = True
+
                 session_end_dt = now + datetime.timedelta(minutes=60)
                 session_wins = 0
                 session_losses = 0
@@ -944,33 +829,30 @@ def run_vip_trading_bot():
                 last_was_loss = False
                 
                 banner = generate_session_banner(is_start=True)
-                # ভিআইপি চ্যানেলে স্টার্ট ব্যানার ও রুলস
                 broadcast_photo(
                     banner,
                     f"🕋 **বিসমিল্লাহির রাহমানির রাহিম** 🕋\n"
                     f"{VIP_HEADER}\n"
                     f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                     f"🟢 **【 𝐕𝐈𝐏 𝐒𝐄𝐒𝐒𝐈𝐎𝐍 𝐒𝐓𝐀𝐑𝐓𝐒 】** 🟢\n\n"
-                    f"মহান আল্লাহর নামে আমাদের আজকের ভিআইপি সেশন শুরু হলো! গভীর মার্কেট রিসার্চ করে শুধুমাত্র **৩ থেকে ৪টি গোল্ডেন সিগন্যাল** দেওয়া হবে। সবাই **১ মিনিটের (1M) চার্ট** ওপেন করে প্রস্তুত থাকুন।",
+                    f"মহান আল্লাহর নামে আমাদের আজকের ভিআইপি সেশন শুরু হলো! গভীর মার্কেট রিসার্চ করে গোল্ডেন সিগন্যাল দেওয়া হবে। সবাই **১ মিনিটের (1M) চার্ট** ওপেন করে প্রস্তুত থাকুন।",
                     with_buttons=True,
                     target_group="VIP"
                 )
                 time.sleep(2)
                 broadcast_text(SETTINGS["rules_text"], with_button=True, target_group="VIP")
 
-                # ফ্রি পাবলিক চ্যানেলে সেশন শুরুর প্রমোশন
                 broadcast_photo(
                     banner,
                     f"🕋 **বিসমিল্লাহির রাহমানির রাহিম** 🕋\n"
                     f"{VIP_HEADER}\n"
                     f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                     f"🟢 **আমাদের প্রাইভেট VIP চ্যানেলে লাইভ ট্রেডিং সেশন শুরু হয়ে গেছে!** 🔥\n\n"
-                    f"আমাদের ভিআইপি মেম্বাররা এখনই বাছাইকৃত গোল্ডেন স্নাইপার সিগন্যালে ট্রেড করে প্রফিট ও লস রিকভারি শুরু করছে!\n\n"
                     f"💎 **ফ্রিতে আমাদের VIP চ্যানেলে যুক্ত হতে চান?**\n"
                     f"নিচের অফিশিয়াল লিংক থেকে ব্রোকার অ্যাকাউন্ট খুলে সেটি **Verify (ভেরিফাই)** করুন এবং আপনার **User ID (UID)** আমার ইনবক্সে পাঠিয়ে দিন!\n\n"
                     f"🔗 **অফিশিয়াল রেজিস্ট্রেশন লিংক:**\n"
                     f"👉 {SETTINGS['register_link']}\n\n"
-                    f"🤝 **না পারলে বা কোনো কিছু না বুঝলে সরাসরি আমাকে ইনবক্স করুন, আমি নিজে আপনাকে গাইড করব:** {ADMIN_USERNAME}",
+                    f"🤝 **না পারলে বা কোনো কিছু না বুঝলে সরাসরি আমাকে ইনবক্স করুন:** {ADMIN_USERNAME}",
                     with_buttons=True,
                     target_group="FREE"
                 )
@@ -981,13 +863,12 @@ def run_vip_trading_bot():
             max_q_target = SETTINGS["max_quality_signals_per_session"]
             target_achieved = (session_wins >= max_q_target and not last_was_loss)
             
-            if now >= session_end_dt or target_achieved or force_instant_session:
-                if force_instant_session:
-                    session_active = False
-                    continue
+            if now >= session_end_dt or target_achieved:
+                for h_key in [10, 14, 20]:
+                    if current_hour == h_key or active_session_key == h_key:
+                        session_started_flag[h_key] = True
+                        session_completed_flag[h_key] = True
 
-                if active_session_key in session_completed_flag:
-                    session_completed_flag[active_session_key] = True
                 session_active = False
                 active_session_key = None
                 time.sleep(3)
@@ -997,7 +878,6 @@ def run_vip_trading_bot():
                 s_total = decisive_trades + session_refunds
                 s_rate = int((session_wins / decisive_trades) * 100) if decisive_trades > 0 else 100
                 
-                # ভিআইপি চ্যানেলে সমাপ্তি
                 end_msg_vip = (
                     f"🤲 **আলহামদুলিল্লাহ! (Alhamdulillah)** 🤲\n"
                     f"{VIP_HEADER}\n"
@@ -1015,7 +895,6 @@ def run_vip_trading_bot():
                 )
                 broadcast_photo(end_banner, end_msg_vip, with_buttons=True, target_group="VIP")
 
-                # ফ্রি পাবলিক চ্যানেলে সেশনের প্রফিট প্রুফ ও বিস্তারিত জয়েনিং গাইড
                 end_msg_free = (
                     f"🤲 **আলহামদুলিল্লাহ! (Alhamdulillah)** 🤲\n"
                     f"{VIP_HEADER}\n"
@@ -1043,8 +922,7 @@ def run_vip_trading_bot():
             if (session_wins + session_losses + session_refunds) == 0:
                 scan_wait = random.randint(30, 55)
             else:
-                # আরও ভালো করে মার্কেট রিসার্চ করার জন্য পর্যাপ্ত সময় নিয়ে স্ক্যান করবে
-                scan_wait = random.randint(260, 440)
+                scan_wait = random.randint(240, 380)
                 
             for _ in range(scan_wait):
                 if force_instant_session:
@@ -1052,7 +930,7 @@ def run_vip_trading_bot():
                 time.sleep(1)
                 
             if force_instant_session:
-                session_active = False
+                force_instant_session = False
                 continue
             
             sig_now = datetime.datetime.now(tz)
@@ -1073,7 +951,6 @@ def run_vip_trading_bot():
             timeset = exit_time_obj.strftime("%H:%M")
             
             asset = get_active_quotex_pair(sig_now)
-            # ৯-স্তরের গভীর মার্কেট রিসার্চ করে ডিরেকশন ও সেটআপ তৈরি করবে
             market_setup = analyze_and_create_market_setup(asset)
             direction = market_setup["direction"]
             snr_reason = market_setup["analysis_text"]
@@ -1114,9 +991,6 @@ def run_vip_trading_bot():
             wait_until(exit_time_obj + datetime.timedelta(seconds=3), tz)
             live_exit_price = fetch_live_market_price(asset)
 
-            # =================================================================
-            # 🛡️ [ZERO FALSE REFUND & STRICT PROFIT VERIFICATION ENGINE]
-            # =================================================================
             need_mtg_wait = False
             outcome = None
 
@@ -1130,14 +1004,12 @@ def run_vip_trading_bot():
                     need_mtg_wait = True
             elif live_entry_price is not None and live_exit_price is not None:
                 price_diff = live_exit_price - live_entry_price
-                # যদি ইয়াহু API ক্যাশ করার কারণে price_diff == 0 দেখায়, তবে বট ভুল করেও REFUND পাঠাবে না!
                 if abs(price_diff) > 0:
                     if (direction == "CALL" and price_diff > 0) or (direction == "PUT" and price_diff < 0):
                         outcome = "DIRECT_WIN"
                     else:
                         need_mtg_wait = True
                 else:
-                    # API প্রাইস যদি স্টিল থাকে, তবে অটো হাই-অ্যাকুরেসি প্রোবাবিলিটি থেকে রেজাল্ট নেবে (কোনো ভুয়া REFUND ছাড়া!)
                     if last_was_loss or session_losses >= 1:
                         outcome = random.choices(["DIRECT_WIN", "MTG_WIN"], weights=[92, 8], k=1)[0]
                     else:
@@ -1158,7 +1030,6 @@ def run_vip_trading_bot():
                     if outcome in ["MTG_WIN", "LOSS"]:
                         need_mtg_wait = True
                 else:
-                    # এখানেও অটো REFUND সম্পূর্ণ বন্ধ (0%) করা হয়েছে যাতে প্রফিট হলে কখনোই রিফান্ড না দেখায়!
                     if last_was_loss or session_losses >= 1:
                         outcome = random.choices(["DIRECT_WIN", "MTG_WIN"], weights=[92, 8], k=1)[0]
                     else:
@@ -1227,5 +1098,6 @@ def run_vip_trading_bot():
 
 if __name__ == "__main__":
     threading.Thread(target=start_keep_alive_server, daemon=True).start()
+    threading.Thread(target=self_ping_anti_sleep, daemon=True).start()
     threading.Thread(target=poll_telegram_admin_commands, daemon=True).start()
     run_vip_trading_bot()
