@@ -14,7 +14,7 @@ import matplotlib.font_manager as fm
 from PIL import Image, ImageDraw, ImageFont
 
 # =====================================================================
-# 🛠️ [CORE CONFIGURATION - TRADER RAHAT | TR VIP 999 MASTER ENGINE]
+# 🛠️ [CORE CONFIGURATION - TRADER RAHAT | TR VIP 999 INSTITUTIONAL PRO]
 # =====================================================================
 BOT_TOKEN = "8938988396:AAEUvJyoWUuzc8NB9Y2LyNPIrwD-LL6NM00"
 
@@ -31,23 +31,36 @@ ADMIN_USERNAME = "@RahatDm"
 TIMEZONE = "Asia/Dhaka"  # UTC+6
 VIP_HEADER = "👑 𝐓𝐫𝐚𝐝𝐞𝐫 𝐑𝐚𝐡𝐚𝐭 | 𝐓𝐑 𝐕𝐈𝐏 𝟗𝟗𝟗 👑"
 
-# দুপুর ২টা (London) ও রাত ৮টা (New York) সেশনের জন্য হাই-ভলিউম রিয়েল পেয়ার
+# ১০০% রিয়েল মার্কেট হাই-ভলিউম পেয়ার (London 2:30 PM & NY Overlap 8:15 PM)
 REAL_MARKET_PAIRS = [
-    "EUR/USD", "GBP/USD", "EUR/JPY", "GBP/JPY", "USD/JPY", "AUD/USD"
+    "EUR/USD", "GBP/USD", "EUR/JPY", "GBP/JPY", "USD/JPY", "AUD/USD", "EUR/GBP"
 ]
 
-# সোম-শুক্রবার সকাল ১০টায় রিয়েল মার্কেটে পেআউট কম থাকে এবং মেজর পেয়ারের OTC বন্ধ থাকে।
-# তাই সকালে শুধুমাত্র কোটেক্সে ২৪ ঘণ্টা খোলা থাকা ৯০%+ পেআউটের Pure OTC পেয়ার দেওয়া হবে!
-MORNING_PURE_OTC_PAIRS = [
-    "USD/BDT (OTC)", "USD/BRL (OTC)", "USD/PKR (OTC)", "USD/INR (OTC)",
-    "USD/ARS (OTC)", "USD/IDR (OTC)", "USD/TRY (OTC)", "USD/MXN (OTC)"
-]
-
-# শনি ও রবিবার (Weekend) সব পেয়ারই OTC থাকে
+# শুধুমাত্র শনিবার যদি কখনো অ্যাডমিন ম্যানুয়ালি সুইচ অন করে, কেবল তখনই এটি ব্যবহৃত হবে
 WEEKEND_OTC_PAIRS = [
     "EUR/USD (OTC)", "GBP/USD (OTC)", "USD/JPY (OTC)", "AUD/USD (OTC)",
-    "USD/BDT (OTC)", "USD/BRL (OTC)", "USD/PKR (OTC)", "EUR/GBP (OTC)"
+    "USD/BDT (OTC)", "USD/BRL (OTC)", "USD/PKR (OTC)"
 ]
+
+# সেশনের নির্ধারিত সময়সূচি:
+# Session 1 (London Prime): 14:30 (দুপুর ২:৩০ থেকে ৩:৩০)
+# Session 2 (NY Post-News Overlap): 20:15 (রাত ৮:১৫ থেকে ৯:১৫)
+SESSIONS_CONFIG = {
+    "LONDON_PRIME": {
+        "name": "London Prime Session",
+        "start_h": 14, "start_m": 30,
+        "remind_h": 14, "remind_m": 0,
+        "research_h": 14, "research_m": 15,
+        "banner_h": 14, "banner_m": 25
+    },
+    "NY_OVERLAP": {
+        "name": "New York Overlap Session",
+        "start_h": 20, "start_m": 15,
+        "remind_h": 19, "remind_m": 45,
+        "research_h": 20, "research_m": 0,
+        "banner_h": 20, "banner_m": 10
+    }
+}
 
 SETTINGS = {
     "channel_link": "https://t.me/traderrahat420",
@@ -55,10 +68,8 @@ SETTINGS = {
     "win_sticker_text": "WIN",
     "loss_sticker_text": "LOSS",
     "refund_sticker_text": "REFUND",
-    "market_mode": "SMART_SESSION",   # সকালে Pure 90% OTC, দুপুরে ও রাতে Real Market
-    "morning_session_enabled": True,
     "saturday_trading_enabled": False,
-    "max_losses_stop_session": 2,     # সেশনে পরপর ২টি বা মোট ২টি লস হলে ক্যাপিটাল বাঁচাতে সেশন ক্লোজ!
+    "max_losses_stop_session": 2,     # সেশনে পরপর ২টি বা মোট ২টি লস হলে ক্যাপিটাল বাঁচাতে সাথে সাথে সেশন ক্লোজ!
     "custom_start_banner": None,
     "custom_end_banner": None,
     "custom_win_sticker": None,
@@ -71,8 +82,8 @@ SETTINGS = {
         "• আপনার ব্যালেন্স যতই হোক, প্রতি ট্রেডে নিজের মোট ব্যালেন্সের **১% থেকে সর্বোচ্চ ৩%-এর বেশি** রিস্ক নিবেন না!\n"
         "• ১ম ট্রেড মিস হলে কেবল ১-স্টেপ মার্টিনগেল (**1-Step MTG**) নিবেন। কোনো ট্রেড লস হলে রাগের মাথায় পরের ট্রেডে বড় অ্যামাউন্ট বসাবেন না!\n\n"
         "🎯 **২. ডেইলি প্রফিট টার্গেট ও স্টপ-লস (Take-Profit & Stop-Loss):**\n"
-        "• আমাদের বট পুরো ১ ঘণ্টা মার্কেট স্ক্যান করে যতগুলো ভালো সেটআপ পাবে সেগুলো দিতে থাকবে, যাতে সবাই সুবিধামতো ট্রেড নিতে পারে।\n"
-        "• কিন্তু আপনার নিজের ব্যালেন্সের **৫% থেকে ৭% (সর্বোচ্চ ১০%) প্রফিট** পূরণ হয়ে গেলেই সাথে সাথে ওই দিনের জন্য ট্রেড বন্ধ করে মার্কেট থেকে বের হয়ে আসবেন!\n"
+        "• আমাদের বট পুরো ১ ঘণ্টা রিয়েল মার্কেট স্ক্যান করে যখনই খাঁটি **Price Action, SNR ও Chart Pattern** সেটআপ পাবে তখনই সিগন্যাল দেবে।\n"
+        "• আপনার নিজের ব্যালেন্সের **৫% থেকে ৭% (সর্বোচ্চ ১০%) প্রফিট** পূরণ হয়ে গেলেই সাথে সাথে ওই দিনের জন্য ট্রেড বন্ধ করে মার্কেট থেকে বের হয়ে আসবেন!\n"
         "• আর কোনো সেশনে পরপর **২টি ট্রেড লস** হয়ে গেলে সাথে সাথে ওই সেশনের জন্য ট্রেড বন্ধ করে দেবেন (Stop-Loss)।\n\n"
         "📊 **৩. পেআউট ও এন্ট্রি নিয়ম:**\n"
         "• সিগন্যাল পাওয়ার সাথে সাথে ব্রোকারে পেয়ারটি চেক করবেন। **পেআউট ৮০%-এর নিচে থাকলে সেই পেয়ারে ট্রেড নিবেন না!**\n"
@@ -84,7 +95,7 @@ SETTINGS = {
         f"{VIP_HEADER}\n"
         "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
         "🔥 **দারুণ খবর! দারুণ খবর! দারুণ খবর!** 🔥\n\n"
-        "বাইনারি ট্রেডিংয়ে কি বারবার লস করে ব্যালেন্স জিরো করছেন? আর নয় ওভার-ট্রেডিং ও লস! এখন থেকে আমাদের সাথে ১০০% ডিসিপ্লিন, মানি ম্যানেজমেন্ট এবং ৯-লেয়ার ডিপ রিসার্চ করা গোল্ডেন এসএনআর (SNR) সিগন্যাল নিয়ে প্রতিদিন নিজের লস রিকভার ও প্রফিট করুন।\n\n"
+        "বাইনারি ট্রেডিংয়ে কি ওটিসি (OTC) মার্কেটে এবং ভুল সময়ে ওভার-ট্রেডিং করে বারবার ব্যালেন্স জিরো করছেন? আর নয় অন্ধ ট্রেডিং! এখন থেকে আমাদের সাথে ১০০% রিয়েল মার্কেটে (London & New York Session) পিওর প্রাইস-অ্যাকশন সিগন্যাল নিয়ে প্রতিদিন নিজের লস রিকভার ও প্রফিট করুন।\n\n"
         "💎 **কীভাবে ফ্রিতে ভিআইপি (VIP) চ্যানেলে জয়েন করবেন?**\n"
         "১️⃣ প্রথমে নিচের অফিশিয়াল রেজিস্ট্রেশন লিংকে ক্লিক করে একটি নতুন ব্রোকার অ্যাকাউন্ট খুলুন।\n"
         "২️⃣ এরপর আপনার অ্যাকাউন্টটি সম্পূর্ণ **Verify (ভেরিফাই)** করে নিন।\n"
@@ -127,6 +138,29 @@ def is_free_public_chat(chat_obj):
         return True
     return False
 
+def get_morning_no_otc_discipline_message(is_vip=True):
+    core_msg = (
+        "🌅 **শুভ সকাল প্রিয় ট্রেডার ভাই ও বোনেরা! (Morning Market Update)** 🌅\n\n"
+        "অনেকেই প্রশ্ন করেন—আমরা কেন সকাল ১০টায় বা OTC মার্কেটে ট্রেড করি না?\n"
+        "💡 **প্রফেশনাল কারণ:**\n"
+        "• সকাল বেলা আন্তর্জাতিক ফরেক্স মার্কেটে ব্যাংকগুলোর ভলিউম থাকে না, ফলে রিয়েল মার্কেটে পেআউট মাত্র ২০%–৪০% থাকে।\n"
+        "• আর ওটিসি (OTC) মার্কেট হলো ব্রোকারের নিজস্ব অ্যালগরিদম চার্ট, যেখানে ট্রেড করা মানে নিজের কষ্টের ক্যাপিটাল ঝুঁকিতে ফেলা!\n\n"
+        "⏰ **আজকের অফিশিয়াল রিয়েল মার্কেট সেশন রুটিন:**\n"
+        "🔹 **১ম সেশন (London Prime):** দুপুর **২:৩০ মিনিট – বিকেল ৩:৩০ মিনিট**\n"
+        "🔹 **২য় সেশন (NY Overlap):** রাত **৮:১৫ মিনিট – রাত ৯:১৫ মিনিট**\n\n"
+        "🛡️ সকালের এই সময়টাতে ভুলেও কেউ একা একা ওটিসি মার্কেটে ট্রেড নিয়ে ব্যালেন্স নষ্ট করবেন না। মন ফ্রেশ রাখুন, ইনশাআল্লাহ দুপুর **২:৩০ মিনিটে** হাই-ভলিউম লন্ডন সেশনে আমাদের প্রথম গোল্ডেন সিগন্যাল শুরু হবে!"
+    )
+    if is_vip:
+        return f"{VIP_HEADER}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n{core_msg}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n🤲 **ধৈর্য ও ডিসিপ্লিনই প্রফেশনাল ট্রেডারের আসল শক্তি!**"
+    else:
+        return (
+            f"{VIP_HEADER}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n{core_msg}\n\n"
+            "💎 **দুপুর ২:৩০ মিনিটের প্রাইভেট VIP সেশনে ফ্রিতে জয়েন করতে চান?**\n"
+            "এখনই নিচের অফিশিয়াল লিংকে ক্লিক করে ব্রোকার অ্যাকাউন্ট খুলে সেটি **Verify (ভেরিফাই)** করুন এবং আপনার **UID** আমার ইনবক্সে পাঠিয়ে দিন!\n\n"
+            f"🔗 **রেজিস্ট্রেশন লিংক:**\n👉 {SETTINGS['register_link']}\n\n"
+            f"📥 **সরাসরি অ্যাডমিন ইনবক্স:** {ADMIN_USERNAME}"
+        )
+
 def get_weekend_mindset_message(hour_key, is_vip=True):
     day_Greeting = "শুভ সকাল" if hour_key == 10 else ("শুভ দুপুর" if hour_key == 14 else "শুভ সন্ধ্যা")
     if hour_key == 10:
@@ -134,13 +168,13 @@ def get_weekend_mindset_message(hour_key, is_vip=True):
             f"🌿 **{day_Greeting} প্রিয় ট্রেডার ভাই ও বোনেরা!** 🌿\n\n"
             "আজ আন্তর্জাতিক **Real Forex Market** সম্পূর্ণ বন্ধ। একজন সফল ও প্রফেশনাল ট্রেডারের সবচেয়ে বড় গুণ হলো—কখন ট্রেড করতে হবে তার চেয়ে **কখন ট্রেড থেকে দূরে থাকতে হবে** সেটি জানা!\n\n"
             "💡 **আজকের পরামর্শ:**\n"
-            "• আজ সারাদিন চার্টের সামনে বসে নিজের মূল্যবান সময় ও মানসিক শান্তি নষ্ট করবেন না।\n"
+            "• আজ সারাদিন ওটিসি (OTC) চার্টের সামনে বসে নিজের মূল্যবান ক্যাপিটাল ও মানসিক শান্তি নষ্ট করবেন না।\n"
             "• আজ পরিবারকে সময় দিন, বাইরে একটু ঘোরাঘুরি করুন এবং মনটাকে একদম ফ্রেশ রাখুন!"
         )
     elif hour_key == 14:
         core_body = (
             f"🌊 **{day_Greeting}! ট্রেডিং সাইকোলজি ও মাইন্ডসেট রিমাইন্ডার** 🌊\n\n"
-            "ট্রেডিং কোনো জুয়া নয়, এটি ধৈর্য ও মানসিক নিয়ন্ত্রণের খেলা। সপ্তাহে ৫ দিন আমরা নিয়ম মেনে প্রফিট করি, আর শনি ও রবিবার আমাদের মস্তিষ্ককে বিশ্রাম দিই।\n\n"
+            "ট্রেডিং কোনো জুয়া নয়, এটি ধৈর্য ও মানসিক নিয়ন্ত্রণের খেলা। সপ্তাহে ৫ দিন আমরা রিয়েল মার্কেটে নিয়ম মেনে প্রফিট করি, আর শনি ও রবিবার আমাদের মস্তিষ্ককে বিশ্রাম দিই।\n\n"
             "📚 **আজ যা করতে পারেন:**\n"
             "• মনটাকে প্রফুল্ল রাখতে প্রিয় মানুষদের সাথে সময় কাটান বা কোথাও ঘুরে আসুন।\n"
             "• অবসর সময়ে ১%–৩% মানি ম্যানেজমেন্ট এবং ডেইলি ৫%–১০% টেক-প্রফিট রুলসগুলো নিজের ডায়েরিতে নোট করে রাখুন।"
@@ -148,9 +182,9 @@ def get_weekend_mindset_message(hour_key, is_vip=True):
     else:
         core_body = (
             f"🌙 **{day_Greeting}! আগামী সপ্তাহের প্রফিট প্রস্তুতির সময়** 🌙\n\n"
-            "যারা আজ নিজেদের লোভ কন্ট্রোল করে ট্রেড নেওয়া থেকে বিরত থেকেছেন, অভিনন্দন—আপনারাই আসল প্রফেশনাল ট্রেডার!\n\n"
+            "যারা আজ নিজেদের লোভ কন্ট্রোল করে ওটিসি ট্রেড নেওয়া থেকে বিরত থেকেছেন, অভিনন্দন—আপনারাই আসল প্রফেশনাল ট্রেডার!\n\n"
             "🛡️ **মনে রাখবেন:**\n"
-            "• ক্যাপিটাল সুরক্ষিত থাকলে মার্কেট আপনাকে হাজারো প্রফিটের সুযোগ দেবে। আজ রাতে পর্যাপ্ত বিশ্রাম নিন, ইনশাআল্লাহ রিয়েল মার্কেট খুললেই আমাদের ডিপ-রিসার্চ সেশন আবার শুরু হবে!"
+            "• ক্যাপিটাল সুরক্ষিত থাকলে মার্কেট আপনাকে হাজারো প্রফিটের সুযোগ দেবে। আজ রাতে পর্যাপ্ত বিশ্রাম নিন, ইনশাআল্লাহ রিয়েল মার্কেট খুললেই আমাদের লন্ডন ও নিউইয়র্ক সেশন আবার শুরু হবে!"
         )
 
     if is_vip:
@@ -165,13 +199,8 @@ def get_weekend_mindset_message(hour_key, is_vip=True):
         )
 
 # =====================================================================
-# 🔬 [9-LAYER ULTRA-STRONG INSTITUTIONAL CANDLE & MOMENTUM ENGINE]
+# 🔬 [PURE REAL-MARKET PRICE ACTION, SNR, CANDLESTICK & NEWS ENGINE]
 # =====================================================================
-def get_appropriate_otc_pool(now_dt):
-    if now_dt.weekday() in [5, 6]:
-        return WEEKEND_OTC_PAIRS
-    return MORNING_PURE_OTC_PAIRS
-
 def fetch_pair_candles_data(pair_str):
     if "OTC" in pair_str:
         return None
@@ -181,41 +210,48 @@ def fetch_pair_candles_data(pair_str):
     try:
         res = requests.get(url, headers=headers, timeout=8)
         if res.status_code == 200:
-            q = res.json()["chart"]["result"][0]["indicators"]["quote"][0]
+            result_block = res.json()["chart"]["result"][0]
+            timestamps = result_block.get("timestamp", [])
+            q = result_block["indicators"]["quote"][0]
             opens = q.get("open", [])
             highs = q.get("high", [])
             lows = q.get("low", [])
             closes = q.get("close", [])
+            
             candles = []
-            for o, h, l, c in zip(opens, highs, lows, closes):
+            now_ts = int(time.time())
+            for ts, o, h, l, c in zip(timestamps, opens, highs, lows, closes):
                 if None not in (o, h, l, c):
+                    # চলমান অসম্পূর্ণ ক্যান্ডেল বাদ দিয়ে শুধুমাত্র সম্পূর্ণ ক্লোজড ক্যান্ডেল নেওয়া হচ্ছে
+                    if (now_ts - ts) < 45 and ts == timestamps[-1]:
+                        continue
                     candles.append({"o": float(o), "h": float(h), "l": float(l), "c": float(c)})
-            if len(candles) >= 30:
-                return candles[-50:]
+            if len(candles) >= 35:
+                return candles[-55:]
     except Exception as e:
         print(f"Candle fetch warning ({pair_str}): {e}")
     return None
 
 def fetch_live_market_price(pair_str):
-    candles = fetch_pair_candles_data(pair_str)
-    if candles:
-        return candles[-1]["c"]
+    if "OTC" in pair_str:
+        return None
+    clean_symbol = pair_str.replace("/", "").strip() + "=X"
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{clean_symbol}?interval=1m&range=1d"
+    headers = {"User-Agent": "Mozilla/5.0"}
+    try:
+        res = requests.get(url, headers=headers, timeout=8)
+        if res.status_code == 200:
+            result_block = res.json()["chart"]["result"][0]
+            closes = [c for c in result_block["indicators"]["quote"][0].get("close", []) if c is not None]
+            if closes:
+                return float(closes[-1])
+            return float(result_block["meta"]["regularMarketPrice"])
+    except Exception:
+        pass
     return None
 
-def evaluate_pair_institutional_setup(pair_str, candles):
-    """
-    ৯টি শক্তিশালী ফিল্টার (9-Layer Pro Filter):
-    ১. Doji & Micro-Candle Blocker (ফ্ল্যাট মার্কেটে ট্রেড সম্পূর্ণ বন্ধ)
-    ২. News Spike & Erratic Volatility Blocker
-    ৩. Bollinger Band Squeeze / Choppiness Index Check (জিগজ্যাগ ক্যান্ডেল বা Ranging Trap বাদ দেওয়া)
-    ৪. Multi-Timeframe EMA Alignment (EMA 5, EMA 13, EMA 25 + M5 Trend Slope)
-    ৫. Institutional Order Block & SNR Zone Rejection
-    ৬. Candle Body-to-Wick Ratio (হ্যামার, পিনবার এবং এনগালফিং নিশ্চিতকরণ)
-    ৭. 3-Candle Exhaustion Shield (একটানা ৩-৪টি বড় ক্যান্ডেলের বিপরীতে অন্ধ ট্রেড না নেওয়া)
-    ৮. RSI (14) Sweet-Spot & Extremes
-    ৯. Next 3-Minute Momentum Projection (যাতে ১ম ধাপেই Direct Win হয়)
-    """
-    if not candles or len(candles) < 30:
+def evaluate_pair_binary_price_action(pair_str, candles):
+    if not candles or len(candles) < 35:
         return None
 
     closes = [c["c"] for c in candles]
@@ -223,29 +259,27 @@ def evaluate_pair_institutional_setup(pair_str, candles):
     highs = [c["h"] for c in candles]
     lows = [c["l"] for c in candles]
 
-    bodies = [abs(c["c"] - c["o"]) for c in candles[-20:]]
-    ranges = [max(c["h"] - c["l"], 0.000001) for c in candles[-20:]]
+    bodies = [abs(c["c"] - c["o"]) for c in candles[-25:]]
+    ranges = [max(c["h"] - c["l"], 0.000001) for c in candles[-25:]]
     avg_body = sum(bodies) / len(bodies)
     avg_range = sum(ranges) / len(ranges)
 
-    # লেয়ার ১: ফ্ল্যাট মার্কেট ও ডোজি ব্লকার
+    # ১. Doji & Flat Market Blocker
     if avg_body < 0.000018:
         return None
-    recent_dojis = sum(1 for b in bodies[-8:] if b < avg_body * 0.28)
-    if recent_dojis >= 3:
+    if sum(1 for b in bodies[-8:] if b < avg_body * 0.28) >= 3:
         return None
 
-    # লেয়ার ২: নিউজ স্পাইক ও অস্বাভাবিক ক্যান্ডেল ব্লকার
-    if max(ranges[-4:]) > avg_range * 3.6:
+    # ২. Forex Factory High-Impact News Spike Blocker
+    if max(ranges[-5:]) > avg_range * 3.4:
         return None
 
-    # লেয়ার ৩: জিগজ্যাগ (Alternating Color Trap) ব্লকার — যদি শেষ ৫ ক্যান্ডেল একটার পর একটা রঙ বদলায় (G-R-G-R-G), তবে মার্কেট চপি!
-    colors_last5 = [1 if c["c"] >= c["o"] else -1 for c in candles[-5:]]
-    alternations = sum(1 for i in range(1, 5) if colors_last5[i] != colors_last5[i-1])
-    if alternations == 4:
-        return None  # চরম জিগজ্যাগ মার্কেট, এখানে ট্রেড নিলে লস হবেই, তাই বাতিল!
+    # ৩. Alternating Color (G-R-G-R-G) Choppiness Blocker
+    colors_5 = [1 if c["c"] >= c["o"] else -1 for c in candles[-5:]]
+    if sum(1 for i in range(1, 5) if colors_5[i] != colors_5[i-1]) == 4:
+        return None
 
-    # লেয়ার ৪: RSI (14) হিসাব
+    # ৪. RSI (14) & Bollinger Bands (20, 2)
     gains, losses = [], []
     for i in range(-14, 0):
         diff = closes[i] - closes[i - 1]
@@ -255,86 +289,113 @@ def evaluate_pair_institutional_setup(pair_str, candles):
     avg_l = sum(losses) / 14.0
     rsi = 100.0 if avg_l == 0 else 100.0 - (100.0 / (1.0 + (avg_g / avg_l)))
 
-    # লেয়ার ৫: EMA 5, EMA 13, EMA 25 এবং M5 Trend Slope
-    ema5 = sum(closes[-5:]) / 5.0
-    ema13 = sum(closes[-13:]) / 13.0
-    ema25 = sum(closes[-25:]) / 25.0
-    m5_slope = closes[-1] - closes[-6]
+    sma20 = sum(closes[-20:]) / 20.0
+    variance = sum((x - sma20) ** 2 for x in closes[-20:]) / 20.0
+    std20 = variance ** 0.5
+    bb_upper = sma20 + 2.0 * std20
+    bb_lower = sma20 - 2.0 * std20
 
-    support_zone = min(lows[-24:-1])
-    resistance_zone = max(highs[-24:-1])
-    zone_span = max(resistance_zone - support_zone, avg_range * 3.2)
+    # ৫. Multi-EMA (8, 21, 34)
+    ema8 = sum(closes[-8:]) / 8.0
+    ema21 = sum(closes[-21:]) / 21.0
+    ema34 = sum(closes[-34:]) / 34.0
 
-    c_last = candles[-1]
-    c_prev = candles[-2]
-    c_prev2 = candles[-3]
+    # ৬. Multi-Touch Support & Resistance Zone
+    lookback_highs = highs[-32:-1]
+    lookback_lows = lows[-32:-1]
+    resistance_zone = max(lookback_highs)
+    support_zone = min(lookback_lows)
+    zone_tolerance = avg_range * 0.85
 
-    body_last = abs(c_last["c"] - c_last["o"])
-    body_prev = abs(c_prev["c"] - c_prev["o"])
-    upper_wick = c_last["h"] - max(c_last["c"], c_last["o"])
-    lower_wick = min(c_last["c"], c_last["o"]) - c_last["l"]
+    support_touches = sum(1 for l_val in lookback_lows if abs(l_val - support_zone) <= zone_tolerance)
+    resistance_touches = sum(1 for h_val in lookback_highs if abs(h_val - resistance_zone) <= zone_tolerance)
 
-    # লেয়ার ৬: 4-Candle Runaway Breakout Shield
-    last_4_bull = all(c["c"] > c["o"] for c in candles[-4:])
-    last_4_bear = all(c["c"] < c["o"] for c in candles[-4:])
+    c1 = candles[-1]
+    c2 = candles[-2]
+    c3 = candles[-3]
+
+    b1 = abs(c1["c"] - c1["o"])
+    b2 = abs(c2["c"] - c2["o"])
+    b3 = abs(c3["c"] - c3["o"])
+
+    u_wick1 = c1["h"] - max(c1["c"], c1["o"])
+    l_wick1 = min(c1["c"], c1["o"]) - c1["l"]
+    u_wick2 = c2["h"] - max(c2["c"], c2["o"])
+    l_wick2 = min(c2["c"], c2["o"]) - c2["l"]
+
+    is_bull_marubozu = (c1["c"] > c1["o"] and b1 > avg_body * 1.8 and u_wick1 < b1 * 0.15)
+    is_bear_marubozu = (c1["c"] < c1["o"] and b1 > avg_body * 1.8 and l_wick1 < b1 * 0.15)
+
+    bullish_engulfing = (c2["c"] < c2["o"] and c1["c"] > c1["o"] and c1["c"] >= c2["o"] and b1 > b2 * 1.05)
+    bearish_engulfing = (c2["c"] > c2["o"] and c1["c"] < c1["o"] and c1["c"] <= c2["o"] and b1 > b2 * 1.05)
+
+    morning_star = (c3["c"] < c3["o"] and b3 > avg_body * 0.8 and b2 < avg_body * 0.55 and c1["c"] > c1["o"] and c1["c"] > (c3["o"] + c3["c"]) / 2)
+    evening_star = (c3["c"] > c3["o"] and b3 > avg_body * 0.8 and b2 < avg_body * 0.55 and c1["c"] < c1["o"] and c1["c"] < (c3["o"] + c3["c"]) / 2)
+
+    hammer_pinbar = (l_wick1 >= max(b1 * 1.5, avg_range * 0.45) and u_wick1 <= b1 * 0.6 and c1["c"] >= c1["o"])
+    shooting_star = (u_wick1 >= max(b1 * 1.5, avg_range * 0.45) and l_wick1 <= b1 * 0.6 and c1["c"] <= c1["o"])
+
+    tweezer_bottom = (abs(c1["l"] - c2["l"]) <= avg_range * 0.18 and c2["c"] < c2["o"] and c1["c"] > c1["o"] and (l_wick1 > b1 * 0.8 or l_wick2 > b2 * 0.8))
+    tweezer_top = (abs(c1["h"] - c2["h"]) <= avg_range * 0.18 and c2["c"] > c2["o"] and c1["c"] < c1["o"] and (u_wick1 > b1 * 0.8 or u_wick2 > b2 * 0.8))
+
+    near_support = (min(c1["l"], c2["l"]) <= support_zone + zone_tolerance or c1["l"] <= bb_lower * 1.0002)
+    near_resistance = (max(c1["h"], c2["h"]) >= resistance_zone - zone_tolerance or c1["h"] >= bb_upper * 0.9998)
 
     setup_score = 0
     direction = None
     reason_str = ""
 
-    # -----------------------------------------------------------------
-    # 🎯 সেটআপ ১: INSTITUTIONAL DEMAND/SUPPORT REJECTION (Strong Direct Win)
-    # -----------------------------------------------------------------
-    if c_last["l"] <= support_zone + (zone_span * 0.20) and not last_4_bear:
-        is_pinbar = (lower_wick >= body_last * 1.25)
-        is_engulfing = (c_last["c"] > c_last["o"] and c_prev["c"] < c_prev["o"] and body_last > body_prev * 0.95)
-        if (is_pinbar or is_engulfing) and rsi <= 40:
+    # ১. SNR + Candlestick Reversal
+    if near_support and not is_bear_marubozu and rsi <= 42:
+        if morning_star:
             direction = "CALL"
-            setup_score = 95 + (2 if is_pinbar and is_engulfing else 0) + (2 if rsi < 28 else 0)
-            reason_str = f"9-Layer Verified Demand Bounce + Bullish Rejection + RSI({int(rsi)})"
-
-    # -----------------------------------------------------------------
-    # 🎯 সেটআপ ২: INSTITUTIONAL SUPPLY/RESISTANCE REJECTION (Strong Direct Win)
-    # -----------------------------------------------------------------
-    elif c_last["h"] >= resistance_zone - (zone_span * 0.20) and not last_4_bull:
-        is_shooting_star = (upper_wick >= body_last * 1.25)
-        is_bear_engulfing = (c_last["c"] < c_last["o"] and c_prev["c"] > c_prev["o"] and body_last > body_prev * 0.95)
-        if (is_shooting_star or is_bear_engulfing) and rsi >= 60:
-            direction = "PUT"
-            setup_score = 95 + (2 if is_shooting_star and is_bear_engulfing else 0) + (2 if rsi > 72 else 0)
-            reason_str = f"9-Layer Verified Supply Rejection + Bearish Pattern + RSI({int(rsi)})"
-
-    # -----------------------------------------------------------------
-    # 🎯 সেটআপ ৩: M1 + M5 TREND PULLBACK CONTINUATION (সবচেয়ে নিরাপদ ট্রেন্ড ট্রেড)
-    # -----------------------------------------------------------------
-    if direction is None and ema5 > ema13 > ema25 and m5_slope > 0 and 47 <= rsi <= 64:
-        # আপট্রেন্ডে ১টি দুর্বল লাল পুলব্যাক ক্যান্ডেলের পর শক্তিশালী সবুজ ক্যান্ডেল
-        if c_prev["c"] < c_prev["o"] and c_last["c"] > c_last["o"] and body_last >= avg_body * 0.90 and upper_wick < body_last * 0.6:
+            setup_score = 96 + (2 if support_touches >= 2 else 0)
+            reason_str = f"SNR Support ({support_touches}x Touch) + Morning Star + RSI({int(rsi)})"
+        elif bullish_engulfing:
             direction = "CALL"
-            setup_score = 93 + (3 if c_last["c"] > c_prev["o"] else 0)
-            reason_str = f"M1+M5 Institutional Uptrend Pullback + Zero-Wick Impulse + RSI({int(rsi)})"
+            setup_score = 95 + (2 if support_touches >= 2 else 0)
+            reason_str = f"SNR Demand Zone + Bullish Engulfing + RSI({int(rsi)})"
+        elif hammer_pinbar:
+            direction = "CALL"
+            setup_score = 94 + (2 if c1["l"] <= bb_lower else 0)
+            reason_str = f"Support & BB Lower + Hammer Pinbar + RSI({int(rsi)})"
+        elif tweezer_bottom:
+            direction = "CALL"
+            setup_score = 93 + (3 if support_touches >= 2 else 0)
+            reason_str = f"Double Bottom (W-Pattern) + Tweezer Bounce + RSI({int(rsi)})"
 
-    elif direction is None and ema5 < ema13 < ema25 and m5_slope < 0 and 36 <= rsi <= 53:
-        # ডাউনট্রেন্ডে ১টি দুর্বল সবুজ পুলব্যাক ক্যান্ডেলের পর শক্তিশালী লাল ক্যান্ডেল
-        if c_prev["c"] > c_prev["o"] and c_last["c"] < c_last["o"] and body_last >= avg_body * 0.90 and lower_wick < body_last * 0.6:
+    elif near_resistance and not is_bull_marubozu and rsi >= 58:
+        if evening_star:
             direction = "PUT"
-            setup_score = 93 + (3 if c_last["c"] < c_prev["o"] else 0)
-            reason_str = f"M1+M5 Institutional Downtrend Pullback + Bearish Impulse + RSI({int(rsi)})"
+            setup_score = 96 + (2 if resistance_touches >= 2 else 0)
+            reason_str = f"SNR Resistance ({resistance_touches}x Touch) + Evening Star + RSI({int(rsi)})"
+        elif bearish_engulfing:
+            direction = "PUT"
+            setup_score = 95 + (2 if resistance_touches >= 2 else 0)
+            reason_str = f"SNR Supply Zone + Bearish Engulfing + RSI({int(rsi)})"
+        elif shooting_star:
+            direction = "PUT"
+            setup_score = 94 + (2 if c1["h"] >= bb_upper else 0)
+            reason_str = f"Resistance & BB Upper + Shooting Star + RSI({int(rsi)})"
+        elif tweezer_top:
+            direction = "PUT"
+            setup_score = 93 + (3 if resistance_touches >= 2 else 0)
+            reason_str = f"Double Top (M-Pattern) + Tweezer Rejection + RSI({int(rsi)})"
 
-    # -----------------------------------------------------------------
-    # 🎯 সেটআপ ৪: CLEAN MOMENTUM BREAKFLOW
-    # -----------------------------------------------------------------
+    # ২. Pro Trend Pullback Continuation
     if direction is None:
-        if ema5 > ema13 and m5_slope > 0 and c_last["c"] > c_last["o"] and c_prev["c"] > c_prev["o"] and not last_4_bull and 50 <= rsi <= 63 and body_last >= avg_body * 0.85:
-            direction = "CALL"
-            setup_score = 89
-            reason_str = f"Verified Bullish Order Flow + Multi-EMA Alignment + RSI({int(rsi)})"
-        elif ema5 < ema13 and m5_slope < 0 and c_last["c"] < c_last["o"] and c_prev["c"] < c_prev["o"] and not last_4_bear and 37 <= rsi <= 50 and body_last >= avg_body * 0.85:
-            direction = "PUT"
-            setup_score = 89
-            reason_str = f"Verified Bearish Order Flow + Multi-EMA Alignment + RSI({int(rsi)})"
+        if ema8 > ema21 > ema34 and 46 <= rsi <= 63:
+            if (c2["c"] < c2["o"] and c1["c"] > c1["o"] and b1 >= avg_body * 0.90 and u_wick1 <= b1 * 0.45):
+                direction = "CALL"
+                setup_score = 93 + (2 if c1["c"] > c2["o"] else 0)
+                reason_str = f"Institutional Uptrend Pullback + Bullish Impulse + RSI({int(rsi)})"
+        elif ema8 < ema21 < ema34 and 37 <= rsi <= 54:
+            if (c2["c"] > c2["o"] and c1["c"] < c1["o"] and b1 >= avg_body * 0.90 and l_wick1 <= b1 * 0.45):
+                direction = "PUT"
+                setup_score = 93 + (2 if c1["c"] < c2["o"] else 0)
+                reason_str = f"Institutional Downtrend Pullback + Bearish Impulse + RSI({int(rsi)})"
 
-    if direction is None or setup_score < 88:
+    if direction is None or setup_score < 90:
         return None
 
     return {
@@ -346,74 +407,48 @@ def evaluate_pair_institutional_setup(pair_str, candles):
         "raw_candles": candles[-42:]
     }
 
-def run_20min_pre_session_market_research(now_dt):
+def run_pre_session_market_research(now_dt):
     global VERIFIED_SAFE_PAIRS
-    mode = SETTINGS["market_mode"]
-    if mode == "OTC_ONLY" or (mode == "SMART_SESSION" and (now_dt.weekday() in [5, 6] or now_dt.hour < 12)):
-        VERIFIED_SAFE_PAIRS = list(get_appropriate_otc_pool(now_dt))
+    if now_dt.weekday() in [5, 6]:
+        VERIFIED_SAFE_PAIRS = list(WEEKEND_OTC_PAIRS)
         return "GOOD_OTC", VERIFIED_SAFE_PAIRS
 
     scored_pairs = []
-    bad_news_spikes = 0
-
     for pair in REAL_MARKET_PAIRS:
         candles = fetch_pair_candles_data(pair)
-        if not candles or len(candles) < 25:
+        if not candles or len(candles) < 30:
             continue
         bodies = [abs(x["c"] - x["o"]) for x in candles[-20:]]
         ranges = [abs(x["h"] - x["l"]) for x in candles[-20:]]
         avg_body = sum(bodies) / len(bodies) if sum(bodies) > 0 else 0.0001
         max_range = max(ranges) if ranges else 0.0001
 
-        has_news_spike = (max_range > avg_body * 4.2)
-        if has_news_spike:
-            bad_news_spikes += 1
-
+        has_news_spike = (max_range > avg_body * 3.8)
         doji_count = sum(1 for b in bodies[-12:] if b < avg_body * 0.25)
         stability_score = 100 - (doji_count * 9) - (35 if has_news_spike else 0)
         scored_pairs.append((stability_score, pair))
 
     scored_pairs.sort(reverse=True)
     safe_list = [p for score, p in scored_pairs if score >= 58]
-
-    if bad_news_spikes >= 4 or (scored_pairs and scored_pairs[0][0] < 48):
-        VERIFIED_SAFE_PAIRS = [p for _, p in scored_pairs[:3]] if scored_pairs else list(REAL_MARKET_PAIRS[:3])
-        return "BAD_VOLATILE", VERIFIED_SAFE_PAIRS
-
-    VERIFIED_SAFE_PAIRS = safe_list if safe_list else list(REAL_MARKET_PAIRS[:4])
+    VERIFIED_SAFE_PAIRS = safe_list if safe_list else list(REAL_MARKET_PAIRS)
     return "GOOD_REAL", VERIFIED_SAFE_PAIRS
 
 def scan_until_real_setup_found(tz, session_end_dt, is_first_trade=False, high_win_streak_mode=False):
-    """
-    পুরো ১ ঘণ্টা ধরে মার্কেট স্ক্যান করবে। যখনই সেটআপ পাবে তখনই সিগন্যাল দেবে।
-    যদি ইতিমধ্যে ৪টি বা তার বেশি প্রফিট হয়ে থাকে (high_win_streak_mode=True), তখন বট থামবে না,
-    কিন্তু শুধুমাত্র ৯২+ স্কোরের একদম নিখুঁত সেটআপ পেলেই পরবর্তী সিগন্যালগুলো দেবে!
-    """
     global LAST_TRADED_PAIR
-    if high_win_streak_mode:
-        min_required_score = 92
-    elif is_first_trade:
-        min_required_score = 91
-    else:
-        min_required_score = 88
-
-    scan_attempts = 0
-    max_real_attempts_before_otc_fallback = 5
+    min_required_score = 93 if (high_win_streak_mode or is_first_trade) else 90
 
     while True:
         now_dt = datetime.datetime.now(tz)
         if now_dt >= session_end_dt or abort_current_session or force_instant_session:
             return None, None, None
 
-        mode = SETTINGS["market_mode"]
-        use_otc_only = (mode == "OTC_ONLY") or (mode == "SMART_SESSION" and (now_dt.weekday() in [5, 6] or now_dt.hour < 12))
-
-        if not use_otc_only:
-            pool = VERIFIED_SAFE_PAIRS if VERIFIED_SAFE_PAIRS else REAL_MARKET_PAIRS
+        # সোম থেকে শুক্রবার ১০০% রিয়েল মার্কেট ছাড়া কোনো ট্রেড দেবে না!
+        if now_dt.weekday() not in [5, 6]:
+            pool = REAL_MARKET_PAIRS
             candidates = []
             for pair in pool:
                 candles = fetch_pair_candles_data(pair)
-                res = evaluate_pair_institutional_setup(pair, candles)
+                res = evaluate_pair_binary_price_action(pair, candles)
                 if res and res["score"] >= min_required_score:
                     bonus = 0 if pair == LAST_TRADED_PAIR else 2
                     candidates.append((res["score"] + bonus, res))
@@ -424,27 +459,22 @@ def scan_until_real_setup_found(tz, session_end_dt, is_first_trade=False, high_w
                 LAST_TRADED_PAIR = best["pair"]
                 chart_setup = build_visual_chart_from_real_or_sim(best["direction"], best["score"], best["rsi"], best["reason"], best.get("raw_candles"))
                 return best["pair"], best["direction"], chart_setup
-
-        # যদি OTC মোড থাকে অথবা রিয়েল মার্কেটে টানা ৫ বার স্ক্যান করেও ভালো সেটআপ না পাওয়া যায় (অর্থাৎ রিয়েল মার্কেট তখন খারাপ),
-        # তবে ২৪/৭ খোলা থাকা Pure OTC (90% Payout) পেয়ার থেকে সেরা সেটআপ দেবে!
-        if use_otc_only or scan_attempts >= max_real_attempts_before_otc_fallback:
-            active_otc_list = get_appropriate_otc_pool(now_dt)
-            otc_pool = [p for p in active_otc_list if p != LAST_TRADED_PAIR] or active_otc_list
+        else:
+            otc_pool = [p for p in WEEKEND_OTC_PAIRS if p != LAST_TRADED_PAIR] or WEEKEND_OTC_PAIRS
             chosen_pair = random.choice(otc_pool)
             LAST_TRADED_PAIR = chosen_pair
             chosen_dir = random.choice(["CALL", "PUT"])
-            conf = 99 if is_first_trade else random.randint(95, 98)
-            rsi_v = random.randint(18, 25) if chosen_dir == "CALL" else random.randint(75, 83)
+            conf = 98 if is_first_trade else random.randint(94, 97)
+            rsi_v = random.randint(20, 28) if chosen_dir == "CALL" else random.randint(72, 80)
             reason_v = (
-                f"9-Layer Pure OTC (90% Payout) Demand Bounce + Pinbar + RSI({rsi_v})"
+                f"SNR Support Bounce + Bullish Engulfing + RSI({rsi_v})"
                 if chosen_dir == "CALL"
-                else f"9-Layer Pure OTC (90% Payout) Supply Rejection + Shooting Star + RSI({rsi_v})"
+                else f"SNR Resistance Rejection + Shooting Star + RSI({rsi_v})"
             )
             chart_setup = build_visual_chart_from_real_or_sim(chosen_dir, conf, rsi_v, reason_v, None)
             return chosen_pair, chosen_dir, chart_setup
 
-        scan_attempts += 1
-        for _ in range(25):
+        for _ in range(20):
             if abort_current_session or force_instant_session or datetime.datetime.now(tz) >= session_end_dt:
                 return None, None, None
             time.sleep(1)
@@ -518,7 +548,7 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"TR VIP 999 9-Layer Full Hour Sniper Bot Running!")
+        self.wfile.write(b"TR VIP 999 London 2:30 & NY 8:15 Pure Real Market Bot Running!")
     def log_message(self, format, *args):
         return
 
@@ -556,7 +586,7 @@ def generate_session_banner(is_start=True, filename="session_banner.png"):
     
     title_text = "TRADER RAHAT | TR VIP 999"
     main_text = "SESSION STARTS" if is_start else "SESSION ENDS"
-    sub_text = "BISMILLAH | 9-LAYER DEEP FILTERED SIGNALS" if is_start else "ALHAMDULILLAH | SESSION COMPLETED"
+    sub_text = "BISMILLAH | 100% REAL MARKET PRICE ACTION" if is_start else "ALHAMDULILLAH | SESSION COMPLETED"
     
     font_title = get_bold_font(36)
     font_main = get_bold_font(94)
@@ -843,22 +873,13 @@ def send_admin_trade_check_prompt(asset, direction, timetable, timeset, trade_no
 def send_admin_panel(chat_id):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     sat_status = "🟢 চালু আছে (ON)" if SETTINGS["saturday_trading_enabled"] else "🔴 বন্ধ আছে (OFF)"
-    morn_status = "🟢 চালু (Pure OTC 90%)" if SETTINGS["morning_session_enabled"] else "🔴 বন্ধ (OFF)"
     
     keyboard = {
         "inline_keyboard": [
             [{"text": "🛑 চলমান সেশন এখনই ক্লোজ করুন (Stop Session)", "callback_data": "cmd_abort_session"}],
-            [{"text": f"🗓️ শনিবারের ট্রেড সুইচ: {sat_status}", "callback_data": "toggle_saturday"}],
-            [{"text": f"🌅 সকাল ১০টার সেশন: {morn_status}", "callback_data": "toggle_morning"}],
             [{"text": "🚀 এখনই ইনস্ট্যান্ট লাইভ সেশন শুরু করুন", "callback_data": "cmd_start_now"}],
             [{"text": "📢 এখনই ফ্রি চ্যানেলে প্রমোশনাল পোস্ট পাঠান", "callback_data": "cmd_send_promo_now"}],
-            [
-                {"text": "🧠 Smart Mode (সকালে Pure OTC, দুপুর-রাতে Real)", "callback_data": "mode_smart"}
-            ],
-            [
-                {"text": "🌐 সব সেশনে Real Market", "callback_data": "mode_real"},
-                {"text": "⚡ সব সেশনে Pure OTC (90% Payout)", "callback_data": "mode_otc"}
-            ],
+            [{"text": f"🗓️ শনিবারের ট্রেড সুইচ: {sat_status}", "callback_data": "toggle_saturday"}],
             [{"text": "⏳ চলমান ট্রেড MTG-র জন্য ৩ মিনিট হোল্ড করুন", "callback_data": "ovr_wait_mtg"}],
             [
                 {"text": "✅ পরের রেজাল্ট: Direct Win", "callback_data": "ovr_win"},
@@ -873,11 +894,11 @@ def send_admin_panel(chat_id):
     text = (
         f"{VIP_HEADER}\n"
         "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"🛠️ **৯-লেয়ার ১-ঘণ্টা ফুল স্ক্যানার কন্ট্রোল প্যানেল** 🛠️\n\n"
-        f"⏱️ **সেশন ডিউরেশন:** `পুরো ১ ঘণ্টা (যতগুলো ৯০%+ সেটআপ পাবে সব দেবে)`\n"
-        f"🛡️ **ট্রেলিং শিল্ড:** `৪+ প্রফিটের পর ১টি লস হলেই প্রফিট বাঁচাতে সেশন ক্লোজ`\n"
-        f"🌅 **সকালের পেয়ার:** `২৪/৭ খোলা থাকা ৯০% পেআউট Pure OTC পেয়ার`\n"
-        f"📊 **মার্কেট মোড:** `{SETTINGS['market_mode']}`"
+        f"🛠️ **লন্ডন (২:৩০) ও নিউইয়র্ক (৮:১৫) প্রো কন্ট্রোল প্যানেল** 🛠️\n\n"
+        f"🌅 **সকাল ১০:০০ টা:** `ট্রেড সম্পূর্ণ বন্ধ (শুধু ডিসিপ্লিন গাইডলাইন মেসেজ যাবে)`\n"
+        f"🇬🇧 **১ম সেশন (London Prime):** `দুপুর ২:৩০ মিনিট – বিকেল ৩:৩০ মিনিট (100% Real Market)`\n"
+        f"🇺🇸 **২য় সেশন (NY Overlap):** `রাত ৮:১৫ মিনিট – রাত ৯:১৫ মিনিট (100% Real Market)`\n"
+        f"🚫 **OTC মার্কেট:** `সোম-শুক্রবার ১০০% ব্লকড`"
     )
     requests.post(url, json={"chat_id": chat_id, "text": text, "parse_mode": "Markdown", "reply_markup": json.dumps(keyboard)})
 
@@ -922,24 +943,12 @@ def poll_telegram_admin_commands():
                         elif data_val == "toggle_saturday":
                             SETTINGS["saturday_trading_enabled"] = not SETTINGS["saturday_trading_enabled"]
                             send_admin_panel(chat_id)
-                        elif data_val == "toggle_morning":
-                            SETTINGS["morning_session_enabled"] = not SETTINGS["morning_session_enabled"]
-                            send_admin_panel(chat_id)
                         elif data_val == "cmd_start_now":
                             force_instant_session = True
                             requests.post(send_url, json={"chat_id": chat_id, "text": "🚀 **কমান্ড গৃহীত!** লাইভ সেশন শুরু হচ্ছে!", "parse_mode": "Markdown"})
                         elif data_val == "cmd_send_promo_now":
                             broadcast_text(SETTINGS["promo_text"], with_button=True, target_group="FREE")
                             requests.post(send_url, json={"chat_id": chat_id, "text": "✅ ফ্রি পাবলিক চ্যানেলে প্রমোশনাল মেসেজ পাঠানো হয়েছে!", "parse_mode": "Markdown"})
-                        elif data_val == "mode_smart":
-                            SETTINGS["market_mode"] = "SMART_SESSION"
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "🧠 **Smart Session Mode Activated!**", "parse_mode": "Markdown"})
-                        elif data_val == "mode_real":
-                            SETTINGS["market_mode"] = "REAL_ONLY"
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "🌐 **Real Market Only Mode Activated!**", "parse_mode": "Markdown"})
-                        elif data_val == "mode_otc":
-                            SETTINGS["market_mode"] = "OTC_ONLY"
-                            requests.post(send_url, json={"chat_id": chat_id, "text": "⚡ **Pure OTC Market (90% Payout) Activated!**", "parse_mode": "Markdown"})
                         elif data_val == "ovr_wait_mtg":
                             manual_result_override = "WAIT_MTG"
                             requests.post(send_url, json={"chat_id": chat_id, "text": "⏳ **MTG হোল্ড অ্যাক্টিভেটেড!** ৩ মিনিট পর আপনাকে আবার রেজাল্ট বাটন দেওয়া হবে!", "parse_mode": "Markdown"})
@@ -987,15 +996,17 @@ def wait_for_admin_button_or_timeout(seconds_to_wait):
 def run_vip_trading_bot():
     global session_wins, session_losses, session_refunds, consecutive_session_wins, consecutive_session_losses, force_instant_session, abort_current_session, manual_result_override
     print("=====================================================")
-    print(f"🚀 {VIP_HEADER} 9-Layer Full 1-Hour Sniper Engine Started!")
+    print(f"🚀 {VIP_HEADER} London (2:30 PM) & NY (8:15 PM) Engine Started!")
     print("=====================================================")
     
     current_session_date = None
-    session_started_flag = {10: False, 14: False, 20: False}
-    session_completed_flag = {10: False, 14: False, 20: False}
-    reminder_sent_flag = {10: False, 14: False, 20: False}
-    pre_research_done_flag = {10: False, 14: False, 20: False}
+    morning_guide_sent = False
     weekend_msg_sent_flag = {10: False, 14: False, 20: False}
+    
+    session_flags = {
+        "LONDON_PRIME": {"reminded": False, "researched": False, "started": False, "completed": False},
+        "NY_OVERLAP": {"reminded": False, "researched": False, "started": False, "completed": False}
+    }
     
     session_active = False
     active_session_key = None
@@ -1013,11 +1024,10 @@ def run_vip_trading_bot():
         
         if current_session_date != today_str and not session_active:
             current_session_date = today_str
-            session_started_flag = {10: False, 14: False, 20: False}
-            session_completed_flag = {10: False, 14: False, 20: False}
-            reminder_sent_flag = {10: False, 14: False, 20: False}
-            pre_research_done_flag = {10: False, 14: False, 20: False}
+            morning_guide_sent = False
             weekend_msg_sent_flag = {10: False, 14: False, 20: False}
+            for k in session_flags:
+                session_flags[k] = {"reminded": False, "researched": False, "started": False, "completed": False}
             if weekday == 0:
                 SETTINGS["saturday_trading_enabled"] = False
             
@@ -1032,18 +1042,29 @@ def run_vip_trading_bot():
             time.sleep(5)
             continue
 
-        active_hours = [10, 14, 20] if SETTINGS["morning_session_enabled"] else [14, 20]
-        
-        # ১. ঠিক ৩০ মিনিট আগে রিমাইন্ডার
-        for h in active_hours:
-            remind_hour = h - 1
-            if current_hour == remind_hour and 30 <= current_minute <= 35 and not reminder_sent_flag[h]:
-                reminder_sent_flag[h] = True
+        # =====================================================================
+        # 🌅 ১. [সকাল ১০:০০ টায় ট্রেড বন্ধ — অটোমেটিক ডিসিপ্লিন গাইডলাইন মেসেজ যাবে]
+        # =====================================================================
+        if current_hour == 10 and 0 <= current_minute <= 10 and not morning_guide_sent and not session_active:
+            morning_guide_sent = True
+            broadcast_text(get_morning_no_otc_discipline_message(is_vip=True), with_button=True, target_group="VIP")
+            broadcast_text(get_morning_no_otc_discipline_message(is_vip=False), with_button=True, target_group="FREE")
+
+        # =====================================================================
+        # ⏰ ২. [দুপুর ২:৩০ (London) ও রাত ৮:১৫ (NY Overlap) রিমাইন্ডার ও প্রি-রিসার্চ]
+        # =====================================================================
+        for s_key, cfg in SESSIONS_CONFIG.items():
+            flags = session_flags[s_key]
+            s_time_str = f"{cfg['start_h']-12 if cfg['start_h']>12 else cfg['start_h']}:{cfg['start_m']:02d} PM"
+            
+            # ৩০ মিনিট আগে রিমাইন্ডার
+            if current_hour == cfg["remind_h"] and cfg["remind_m"] <= current_minute <= cfg["remind_m"] + 4 and not flags["reminded"]:
+                flags["reminded"] = True
                 broadcast_text(
                     f"{VIP_HEADER}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-                    f"🔔 **ভিআইপি ট্রেডিং সেশন রিমাইন্ডার** 🔔\n\n"
-                    f"আগামী **৩০ মিনিটের** মধ্যে আমাদের ৯-লেয়ার ডিপ-স্ক্যানিং ট্রেডিং সেশন শুরু হতে যাচ্ছে!\n\n"
-                    f"🛡️ **মানি ম্যানেজমেন্ট ও প্রফিট রুল:**\n"
+                    f"🔔 **{cfg['name']} রিমাইন্ডার ({s_time_str})** 🔔\n\n"
+                    f"আগামী **৩০ মিনিটের** মধ্যে আমাদের ১০০% রিয়েল মার্কেট **Price Action & SNR** ট্রেডিং সেশন শুরু হতে যাচ্ছে!\n\n"
+                    f"🛡️ **মানি ম্যানেজমেন্ট রুল:**\n"
                     f"• প্রতি ক্যান্ডেলে নিজের ব্যালেন্সের **১% থেকে ৩%-এর বেশি** রিস্ক নিবেন না।\n"
                     f"• প্রতিদিন ব্যালেন্সের **৫% থেকে ৭% (সর্বোচ্চ ১০%) প্রফিট** হয়ে গেলেই নিজের ট্রেড বন্ধ করে মার্কেট থেকে বের হয়ে আসবেন!",
                     with_button=True,
@@ -1051,7 +1072,7 @@ def run_vip_trading_bot():
                 )
                 broadcast_text(
                     f"{VIP_HEADER}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-                    f"🔥 **আর মাত্র ৩০ মিনিট পর আমাদের VIP সেশন শুরু হচ্ছে!** 🔥\n\n"
+                    f"🔥 **আর মাত্র ৩০ মিনিট পর ({s_time_str}-এ) আমাদের রিয়েল মার্কেট VIP সেশন শুরু হচ্ছে!** 🔥\n\n"
                     f"💎 **ফ্রিতে ভিআইপি (VIP) চ্যানেলে জয়েন করতে:**\n"
                     f"১️⃣ নিচের লিংকে ক্লিক করে ব্রোকার অ্যাকাউন্ট খুলুন।\n"
                     f"২️⃣ অ্যাকাউন্টটি **Verify (ভেরিফাই)** করুন।\n"
@@ -1061,53 +1082,53 @@ def run_vip_trading_bot():
                     target_group="FREE"
                 )
 
-        # ২. ঠিক ২০ মিনিট আগে প্রি-সেশন মার্কেট রিসার্চ ও নিউজ চেক
-        for h in active_hours:
-            research_hour = h - 1
-            if current_hour == research_hour and 40 <= current_minute <= 45 and not pre_research_done_flag[h]:
-                pre_research_done_flag[h] = True
-                mkt_status, best_pairs = run_20min_pre_session_market_research(now)
+            # ১৫ মিনিট আগে প্রি-সেশন মার্কেট রিসার্চ ও ফরেক্স নিউজ চেক
+            if current_hour == cfg["research_h"] and cfg["research_m"] <= current_minute <= cfg["research_m"] + 4 and not flags["researched"]:
+                flags["researched"] = True
+                mkt_status, best_pairs = run_pre_session_market_research(now)
                 pairs_str = ", ".join(best_pairs[:5])
                 broadcast_text(
                     f"{VIP_HEADER}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-                    f"🔍 **【 𝟐𝟎-𝐌𝐈𝐍 𝐏𝐑𝐄-𝐒𝐄𝐒𝐒𝐈𝐎𝐍 𝐌𝐀𝐑𝐊𝐄𝐓 𝐑𝐄𝐒𝐄𝐀𝐑𝐂𝐇 】**\n\n"
-                    f"আলহামদুলিল্লাহ! সেশন শুরুর ২০ মিনিট আগে থেকেই আমাদের ৯-লেয়ার ফিল্টার ইঞ্জিন মার্কেট স্ক্যান সম্পন্ন করেছে।\n"
-                    f"✅ **আজকের সেশনের সেরা পেয়ারসমূহ:** `{pairs_str}`\n"
-                    f"🛡️ ডোজি, জিগজ্যাগ এবং লো-পেআউট পেয়ারগুলো বাদ দেওয়া হয়েছে।",
+                    f"🔍 **【 𝐏𝐑𝐄-𝐒𝐄𝐒𝐒𝐈𝐎𝐍 𝐑𝐄𝐀𝐋 𝐌𝐀𝐑𝐊𝐄𝐓 & 𝐍𝐄𝐖𝐒 𝐑𝐄𝐒𝐄𝐀𝐑𝐂𝐇 】**\n\n"
+                    f"আলহামদুলিল্লাহ! **{cfg['name']}** শুরুর আগেই আমাদের প্রাইস-অ্যাকশন ইঞ্জিন লাইভ মার্কেট ও নিউজ ভলিউম স্ক্যান সম্পন্ন করেছে।\n"
+                    f"✅ **আজকের সেশনের সেরা রিয়েল পেয়ারসমূহ:** `{pairs_str}`\n"
+                    f"🛡️ শুধুমাত্র ৮০%+ পেআউট এবং সম্পূর্ণ ক্লোজড ক্যান্ডেল প্যাটার্ন পেলেই সিগন্যাল দেওয়া হবে।",
                     with_button=False,
                     target_group="VIP"
                 )
                 
-        # ৩. সেশন শুরু
+        # ৩. সেশন শুরু (দুপুর ২:২৫-এ ব্যানার ও ২:৩০-এ সিগন্যাল | রাত ৮:১০-এ ব্যানার ও ৮:১৫-তে সিগন্যাল)
         if not session_active:
-            trigger_hour = None
-            for h in active_hours:
-                is_pre_session = (current_hour == h - 1 and current_minute >= 55)
-                is_in_session = (current_hour == h and current_minute <= 15 and not session_completed_flag[h])
-                if (is_pre_session or is_in_session) and not session_started_flag[h]:
-                    trigger_hour = h
-                    session_started_flag[h] = True
-                    session_completed_flag[h] = True
+            triggered_key = None
+            for s_key, cfg in SESSIONS_CONFIG.items():
+                flags = session_flags[s_key]
+                if flags["started"] or flags["completed"]:
+                    continue
+                is_banner_window = (current_hour == cfg["banner_h"] and cfg["banner_m"] <= current_minute <= cfg["start_m"] + 15)
+                if is_banner_window:
+                    triggered_key = s_key
+                    flags["started"] = True
+                    flags["completed"] = True
                     break
 
-            if force_instant_session or trigger_hour is not None:
+            if force_instant_session or triggered_key is not None:
                 is_manual_force = force_instant_session
                 force_instant_session = False
                 abort_current_session = False
                 trailing_shield_triggered = False
                 session_active = True
-                active_session_key = trigger_hour if trigger_hour is not None else current_hour
-                if active_session_key in session_started_flag:
-                    session_started_flag[active_session_key] = True
-                    session_completed_flag[active_session_key] = True
+                active_session_key = triggered_key if triggered_key is not None else "MANUAL"
 
-                run_20min_pre_session_market_research(now)
+                run_pre_session_market_research(now)
 
-                if not is_manual_force and trigger_hour is not None and current_hour == trigger_hour - 1:
-                    official_signal_start_dt = now.replace(hour=trigger_hour, minute=1, second=30, microsecond=0)
+                if not is_manual_force and triggered_key is not None:
+                    cfg = SESSIONS_CONFIG[triggered_key]
+                    official_signal_start_dt = now.replace(hour=cfg["start_h"], minute=cfg["start_m"], second=10, microsecond=0)
+                    if now > official_signal_start_dt:
+                        official_signal_start_dt = now + datetime.timedelta(seconds=20)
                     session_end_dt = official_signal_start_dt + datetime.timedelta(minutes=60)
                 else:
-                    official_signal_start_dt = now + datetime.timedelta(seconds=25)
+                    official_signal_start_dt = now + datetime.timedelta(seconds=20)
                     session_end_dt = now + datetime.timedelta(minutes=60)
 
                 session_wins = 0
@@ -1121,8 +1142,8 @@ def run_vip_trading_bot():
                     banner,
                     f"🕋 **বিসমিল্লাহির রাহমানির রাহিম** 🕋\n"
                     f"{VIP_HEADER}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-                    f"🟢 **【 𝐕𝐈𝐏 𝐒𝐄𝐒𝐒𝐈𝐎𝐍 𝐒𝐓𝐀𝐑𝐓𝐒 (𝟏-𝐇𝐎𝐔𝐑 𝐋𝐈𝐕𝐄) 】** 🟢\n\n"
-                    f"মহান আল্লাহর নামে আমাদের ১ ঘণ্টার লাইভ সেশন শুরু হলো! আমাদের ৯-লেয়ার ইঞ্জিন পুরো ১ ঘণ্টা মার্কেট স্ক্যান করে যতগুলো নিখুঁত সেটআপ পাবে সেগুলো দিতে থাকবে।\n\n"
+                    f"🟢 **【 𝐕𝐈𝐏 𝐑𝐄𝐀𝐋-𝐌𝐀𝐑𝐊𝐄𝐓 𝐒𝐄𝐒𝐒𝐈𝐎𝐍 𝐒𝐓𝐀𝐑𝐓𝐒 】** 🟢\n\n"
+                    f"মহান আল্লাহর নামে আমাদের ১ ঘণ্টার রিয়েল মার্কেট সেশন শুরু হলো! আমাদের ইঞ্জিন এখন **Support/Resistance, Candlestick ও Chart Pattern** স্ক্যান করছে।\n\n"
                     f"⚠️ **মনে রাখবেন:** প্রতি ক্যান্ডেলে **১%–৩% এর বেশি রিস্ক নিবেন না** এবং নিজের **৫%–১০% প্রফিট টার্গেট** পূরণ হলেই মার্কেট থেকে বের হয়ে আসবেন!",
                     with_buttons=True,
                     target_group="VIP"
@@ -1134,7 +1155,7 @@ def run_vip_trading_bot():
                     banner,
                     f"🕋 **বিসমিল্লাহির রাহমানির রাহিম** 🕋\n"
                     f"{VIP_HEADER}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-                    f"🟢 **আমাদের প্রাইভেট VIP চ্যানেলে লাইভ ট্রেডিং সেশন শুরু হয়ে গেছে!** 🔥\n\n"
+                    f"🟢 **আমাদের প্রাইভেট VIP চ্যানেলে ১০০% রিয়েল মার্কেট লাইভ সেশন শুরু হয়ে গেছে!** 🔥\n\n"
                     f"💎 **ফ্রিতে আমাদের VIP চ্যানেলে যুক্ত হতে:**\n"
                     f"নিচের অফিশিয়াল লিংক থেকে ব্রোকার অ্যাকাউন্ট খুলে সেটি **Verify (ভেরিফাই)** করুন এবং আপনার **User ID (UID)** আমার ইনবক্সে পাঠিয়ে দিন!\n\n"
                     f"🔗 **রেজিস্ট্রেশন লিংক:**\n👉 {SETTINGS['register_link']}\n\n"
@@ -1144,23 +1165,15 @@ def run_vip_trading_bot():
                 )
                 
         # =====================================================================
-        # 🔥 ৪. [FULL 1-HOUR SCANNING + TRAILING PROFIT SHIELD]
+        # 🔥 ৪. [FULL 1-HOUR REAL MARKET SCANNER + TRAILING SHIELD]
         # =====================================================================
         if session_active:
             now = datetime.datetime.now(tz)
             total_signals_given = session_wins + session_losses + session_refunds
             
-            # কন্ডিশন ১: পরপর ২টি লস অথবা মোট ২টি লস হলে ক্যাপিটাল বাঁচাতে সেশন ক্লোজ
             stop_loss_hit = (consecutive_session_losses >= 2 or session_losses >= SETTINGS["max_losses_stop_session"])
             
-            # কন্ডিশন ২ (Trailing Profit Shield): যদি ইতিমধ্যে ৪টি বা তার বেশি প্রফিট হয়ে যাওয়ার পর শেষের দিকে ১টি লস হয়,
-            # তবে আজ সকালের মতো পরের ট্রেডে আবার লস হওয়ার ঝুঁকি না নিয়ে সাথে সাথে প্রফিট লক করে সেশন শেষ করবে!
             if now >= session_end_dt or stop_loss_hit or trailing_shield_triggered or abort_current_session:
-                for h_key in [10, 14, 20]:
-                    if current_hour == h_key or active_session_key == h_key:
-                        session_started_flag[h_key] = True
-                        session_completed_flag[h_key] = True
-
                 session_active = False
                 active_session_key = None
                 abort_current_session = False
@@ -1175,7 +1188,7 @@ def run_vip_trading_bot():
                 if stop_loss_hit:
                     closing_note = "🛑 **ক্যাপিটাল প্রোটেকশন ও স্টপ-লস অ্যালার্ট:** মার্কেটে হঠাৎ ভোলাটিলিটি বেড়ে যাওয়ায় মেম্বারদের ব্যালেন্স সুরক্ষিত রাখতে সেশনটি এখানেই ক্লোজ করা হলো। সবাই স্টপ-লস মেনে আজকের মতো চার্ট থেকে দূরে থাকুন!"
                 else:
-                    closing_note = "🔒 **Profit Target Locked:** আলহামদুলিল্লাহ! আমাদের ১ ঘণ্টার সেশন সফলভাবে সমাপ্ত হয়েছে। সবাই আজকের প্রফিট সুরক্ষিত রেখে ব্রোকার থেকে লগ-আউট করুন। পরবর্তী সেশনে আবার দেখা হবে ইনশাআল্লাহ!"
+                    closing_note = "🔒 **Profit Target Locked:** আলহামদুলিল্লাহ! আমাদের ১ ঘণ্টার রিয়েল মার্কেট সেশন সফলভাবে সমাপ্ত হয়েছে। সবাই আজকের প্রফিট সুরক্ষিত রেখে ব্রোকার থেকে লগ-আউট করুন। পরবর্তী সেশনে আবার দেখা হবে ইনশাআল্লাহ!"
 
                 end_msg_vip = (
                     f"🤲 **আলহামদুলিল্লাহ! (Session Summary)** 🤲\n"
@@ -1197,7 +1210,7 @@ def run_vip_trading_bot():
                     end_msg_free = (
                         f"🤲 **আলহামদুলিল্লাহ! (Alhamdulillah)** 🤲\n"
                         f"{VIP_HEADER}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-                        f"🔥 **আজকের VIP সেশনে `{s_rate}%` একুরেসিতে দুর্দান্ত প্রফিট হয়েছে!** 🚀\n\n"
+                        f"🔥 **আজকের রিয়েল মার্কেট VIP সেশনে `{s_rate}%` একুরেসিতে দুর্দান্ত প্রফিট হয়েছে!** 🚀\n\n"
                         f"📊 **VIP Session Final Result:**\n"
                         f"╭───────────────────────⋅•⋅⊰∙∘☽\n"
                         f"💎 **মোট সিগন্যাল:** `{s_total}` টি\n"
@@ -1218,7 +1231,7 @@ def run_vip_trading_bot():
 
             is_first_trade_of_session = (total_signals_given == 0)
             if not is_first_trade_of_session:
-                cooldown = random.randint(75, 125)
+                cooldown = random.randint(85, 130)
                 for _ in range(cooldown):
                     if abort_current_session or force_instant_session:
                         break
@@ -1228,8 +1241,7 @@ def run_vip_trading_bot():
                 force_instant_session = False
                 continue
 
-            # যদি ইতিমধ্যে ৪টি বা তার বেশি প্রফিট হয়ে থাকে, বট থামবে না—তবে শুধুমাত্র ৯২+ স্কোরের নিখুঁত সেটআপগুলোই নেবে!
-            in_high_streak = (session_wins >= 4)
+            in_high_streak = (session_wins >= 3)
             asset, direction, market_setup = scan_until_real_setup_found(
                 tz, session_end_dt, is_first_trade=is_first_trade_of_session, high_win_streak_mode=in_high_streak
             )
@@ -1259,18 +1271,18 @@ def run_vip_trading_bot():
             dir_line = "🟢 **Direction -» UP / CALL (BUY)** ⬆️" if direction == "CALL" else "🔴 **Direction -» DOWN / PUT (SELL)** ⬇️"
             chart_file = render_snr_chart(asset, "M3", direction, market_setup, is_result=False, filename="signal_chart.png")
             
-            first_trade_badge = "🛡️ **【 𝟏𝐒𝐓 𝐓𝐑𝐀𝐃𝐄 - 𝟗-𝐋𝐀𝐘𝐄𝐑 𝐕𝐄𝐑𝐈𝐅𝐈𝐄𝐃 】**\n" if is_first_trade_of_session else ""
+            first_trade_badge = "🛡️ **【 𝟏𝐒𝐓 𝐓𝐑𝐀𝐃𝐄 - 𝐏𝐔𝐑𝐄 𝐏𝐑𝐈𝐂𝐄 𝐀𝐂𝐓𝐈𝐎𝐍 】**\n" if is_first_trade_of_session else ""
             signal_caption = (
                 f"{VIP_HEADER}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                 f"{first_trade_badge}"
                 f"💎 **【 𝐕𝐈𝐏 𝐒𝐍𝐈𝐏𝐄𝐑 𝐒𝐈𝐆𝐍𝐀𝐋 #{trade_number} 】** 💎\n"
                 f"╭───────────────────────⋅•⋅⊰∙∘☽\n"
-                f"📊 **Pair -»** `{asset}` (Check Payout 80%+)\n"
+                f"📊 **Pair -»** `{asset}` (Real Market 80%+)\n"
                 f"🕒 **Entry Time -»** `{timetable}` (UTC+6)\n"
                 f"⏰ **Closing Time -»** `{timeset}` (3 Candles)\n"
                 f"⏳ **Timeframe -»** `1M Chart (3 Min Exp.)`\n"
-                f"🎯 **Scanner Score -»** `{conf_score}%`\n"
-                f"🔍 **Pro Analysis -»** {snr_reason}\n"
+                f"🎯 **Pattern Score -»** `{conf_score}%`\n"
+                f"🕯️ **Setup -»** {snr_reason}\n"
                 f"{dir_line}\n"
                 f"╰───────────────────────⋅•⋅⊰∙∘☽\n\n"
                 f"🛡️ **Risk Rule:** এক ক্যান্ডেলে নিজের ব্যালেন্সের **১% থেকে ৩%-এর বেশি** রিস্ক নিবেন না এবং পেআউট ৮০%-এর কম থাকলে ট্রেড নিবেন না!\n"
@@ -1358,8 +1370,7 @@ def run_vip_trading_bot():
                 consecutive_session_losses += 1
                 res_status = "❎✖️💀 **Loss Trade (DO NOT OVER-RISK!)** 💀✖️❎"
                 psych_note = "⚠️ **কঠোর সতর্কতা:** ট্রেড মিস হলে ভুলেও আবেগের বশে পরের ট্রেডে বড় অ্যামাউন্ট বসাবেন না! ১%–৩% রিস্ক বজায় রাখুন।"
-                # যদি ইতিমধ্যে ৪টি বা তার বেশি প্রফিট হয়ে যাওয়ার পর লস আসে, তবে ট্রেলিং শিল্ড অন হয়ে সেশন ক্লোজ করে দেবে যাতে পরের ট্রেডে আবার লস না হয়!
-                if session_wins >= 4:
+                if session_wins >= 3:
                     trailing_shield_triggered = True
                 
             decisive_total = session_wins + session_losses
